@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recruitment Pipeline Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<style>
+:root{--bg:#f3f5fa;--card:#fff;--txt:#1e293b;--mut:#64748b;--line:#e4e8f0;--side:#0f172a;--acc:#4f46e5;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131c2e;--txt:#e5e7eb;--mut:#94a3b8;--line:#243049;--side:#070d18;--acc:#60a5fa;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#131c2e;--txt:#e5e7eb;--mut:#94a3b8;--line:#243049;--side:#070d18;--acc:#60a5fa;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 6px 18px rgba(15,23,42,.04)}
+.mut{color:var(--mut)}
+.inp{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;color:var(--txt);width:100%;min-height:38px}
+.inp:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;min-height:38px;border:1px solid var(--line);background:var(--card);color:var(--txt)}
+.btn-p{background:#4f46e5;border-color:#4f46e5;color:#fff}
+.th{text-align:left;font-weight:600;font-size:12px;color:var(--mut);padding:10px 12px;background:color-mix(in srgb,var(--mut) 7%,transparent);border-bottom:1px solid var(--line);white-space:nowrap}
+.td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;color:#94a3b8;white-space:nowrap}
+.nav.on{background:rgba(129,140,248,.18);color:#fff}
+.scroll-x{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+tbody tr:hover td{background:color-mix(in srgb,var(--acc) 5%,transparent)}
+.ch{height:clamp(220px,34vw,300px);position:relative;width:100%}
+body{overflow-x:hidden}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.g2,.g3{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1180px){.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end}
+@media (max-width:1023px){.fl.off{display:none}}
+.wrap{max-width:1440px;margin:0 auto;width:100%}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.b-Diterima{background:rgba(16,185,129,.14);color:#059669}.b-Ditolak{background:rgba(244,63,94,.14);color:#e11d48}.b-Proses{background:rgba(245,158,11,.16);color:#d97706}
+.kpi-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:2px;background:var(--side);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.08)}
+.bnav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:#94a3b8;padding:6px 2px;border-radius:10px}
+.bnav button.on{color:#fff;background:rgba(129,140,248,.2)}
+@media (min-width:1024px){.bnav{display:none}}
+@media (max-width:639px){.inp{font-size:16px}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useMemo}=React;
+const STAGES=["Screening","HR Interview","Technical","Final","Hired"];
+const SOURCES=["Website","LinkedIn","Referral","Job Fair","Indeed"];
+const STATUSES=["Proses","Diterima","Ditolak"];
+const PAL=["#6366f1","#14b8a6","#f59e0b","#ec4899","#0ea5e9","#94a3b8"];
+const KEY="rp_candidates_v1";
+const fmt=n=>new Intl.NumberFormat("id-ID").format(Math.round(n||0));
+const rp=n=>"Rp "+fmt(n);
+const days=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const today=()=>new Date().toISOString().slice(0,10);
+const blank=()=>({id:"",name:"",position:"",source:"Website",applyDate:today(),stage:"Screening",interviewer:"",status:"Proses",hireDate:"",salary:"",notes:""});
+const group=(arr,fn)=>arr.reduce((m,x)=>{const k=fn(x);(m[k]=m[k]||[]).push(x);return m},{});
+const tth=c=>c.status==="Diterima"&&c.hireDate&&c.applyDate?days(c.applyDate,c.hireDate):null;
+const num=v=>Number(v)>0?Number(v):0;
+const P={grid:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",funnel:"M22 3H2l8 9.5V19l4 2v-8.5z",globe:"M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 3 17 0 20M12 2c-3 3-3 17 0 20",clock:"M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2",wallet:"M3 7h16a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 7V5a2 2 0 012-2h12v4M16 14h2",db:"M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3",plus:"M12 5v14M5 12h14",edit:"M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z",trash:"M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6",sun:"M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",moon:"M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z",x:"M18 6L6 18M6 6l12 12",search:"M11 3a8 8 0 100 16 8 8 0 000-16zM21 21l-4.3-4.3",users:"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 3a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8",dl:"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3",check:"M20 6L9 17l-5-5"};
+function I({n,s=16}){return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={P[n]||""}/></svg>}
+
+class EB extends React.Component{
+  constructor(p){super(p);this.state={e:null}}
+  static getDerivedStateFromError(e){return{e}}
+  componentDidCatch(e){console.error(e)}
+  render(){return this.state.e?<div className="card p-6"><p className="font-semibold">Halaman gagal ditampilkan</p><p className="mut text-sm mt-1">{String(this.state.e.message||this.state.e)}</p><button className="btn mt-3" onClick={()=>this.setState({e:null})}>Coba lagi</button></div>:this.props.children}
+}
+
+function ChartBox({type,labels,sets,stacked,horizontal,theme}){
+  const ref=useRef(null);
+  const key=JSON.stringify([type,labels,sets,stacked,horizontal,theme]);
+  const has=labels.length>0;
+  useEffect(()=>{
+    if(!has||!ref.current||!window.Chart)return;
+    let ch=null;
+    try{
+      const cs=getComputedStyle(document.documentElement),tc=cs.getPropertyValue("--mut").trim()||"#64748b",gc=cs.getPropertyValue("--line").trim()||"#e4e8f0",bd=cs.getPropertyValue("--card").trim()||"#fff";
+      const pie=type==="doughnut";
+      ch=new window.Chart(ref.current,{type,data:{labels,datasets:sets.map((s,i)=>({backgroundColor:pie?PAL:PAL[i%6],borderColor:pie?bd:PAL[i%6],borderRadius:pie?0:5,tension:.3,...s}))},
+        options:{animation:false,responsive:true,maintainAspectRatio:false,indexAxis:horizontal?"y":"x",plugins:{legend:{display:pie||sets.length>1,labels:{color:tc,boxWidth:12}}},
+        scales:pie?{}:{x:{stacked:!!stacked,ticks:{color:tc},grid:{display:!!horizontal,color:gc}},y:{stacked:!!stacked,beginAtZero:true,ticks:{color:tc,precision:0},grid:{display:!horizontal,color:gc}}}}});
+    }catch(e){console.error("Chart error",e)}
+    return()=>{if(ch)ch.destroy()};
+  },[key]);
+  if(has&&!window.Chart)return <div className="ch flex items-center justify-center mut text-sm text-center">Library grafik gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.</div>;
+  return has?<div className="ch"><canvas ref={ref}/></div>:<div className="ch flex items-center justify-center mut text-sm">Belum ada data untuk grafik ini.</div>;
+}
+function Panel({title,children,className=""}){return <section className={"card p-4 sm:p-5 min-w-0 "+className}><h3 className="font-semibold text-sm mb-4">{title}</h3>{children}</section>}
+function Kpi({label,value,sub,ic,c,cls=""}){return <div className={"card p-4 min-w-0 "+cls}><div className="kpi-ic" style={{background:c+"22",color:c}}><I n={ic}/></div><div className="mut text-xs mt-3">{label}</div><div className="text-xl sm:text-2xl font-bold mt-0.5 truncate">{value}</div>{sub&&<div className="mut text-xs mt-1">{sub}</div>}</div>}
+function Table({cols,rows}){return <div className="scroll-x"><table className="w-full"><thead><tr>{cols.map(c=><th key={c} className="th">{c}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i}>{r.map((v,j)=><td key={j} className="td">{STATUSES.includes(v)?<span className={"badge b-"+v}>{v}</span>:v}</td>)}</tr>)}{!rows.length&&<tr><td className="td mut" colSpan={cols.length}>Tidak ada data pada filter ini.</td></tr>}</tbody></table></div>}
+
+function Overview({rows,theme}){
+  const hired=rows.filter(d=>d.status==="Diterima"),rej=rows.filter(d=>d.status==="Ditolak");
+  const tths=rows.map(tth).filter(x=>x!==null),sal=rows.map(d=>num(d.salary)).filter(x=>x>0);
+  const m=group(rows,d=>String(d.applyDate).slice(0,7)),ks=Object.keys(m).sort();
+  return <>
+    <div className="kpis">
+      <Kpi ic="users" c="#6366f1" label="Total Lamaran" value={fmt(rows.length)}/>
+      <Kpi ic="check" c="#10b981" label="Hired" value={fmt(hired.length)} sub={rows.length?Math.round(hired.length/rows.length*100)+"% dari lamaran":""}/>
+      <Kpi ic="x" c="#f43f5e" label="Rejected" value={fmt(rej.length)}/>
+      <Kpi ic="clock" c="#f59e0b" label="Avg Time to Hire" value={tths.length?fmt(avg(tths))+" hari":"-"}/>
+      <Kpi ic="wallet" c="#0ea5e9" label="Avg Salary" value={sal.length?rp(avg(sal)):"-"}/>
+    </div>
+    <div className="g3 mt-3">
+      <Panel title="Tren lamaran per bulan"><ChartBox theme={theme} type="line" labels={ks} sets={[{label:"Lamaran",data:ks.map(k=>m[k].length)},{label:"Diterima",data:ks.map(k=>m[k].filter(d=>d.status==="Diterima").length)},{label:"Ditolak",data:ks.map(k=>m[k].filter(d=>d.status==="Ditolak").length)}]}/></Panel>
+      <Panel title="Distribusi status"><ChartBox theme={theme} type="doughnut" labels={STATUSES} sets={[{data:STATUSES.map(s=>rows.filter(d=>d.status===s).length)}]}/></Panel>
+    </div></>;
+}
+function Pipeline({rows,theme}){
+  const ps=[...new Set(rows.map(d=>d.position))].sort();
+  return <>
+    <Panel title="Kandidat per tahap seleksi, per posisi"><ChartBox theme={theme} type="bar" stacked labels={ps} sets={STAGES.map(s=>({label:s,data:ps.map(p=>rows.filter(d=>d.position===p&&d.stage===s).length)}))}/></Panel>
+    <Panel title="Rincian tabel" className="mt-3"><Table cols={["Posisi",...STAGES,"Total"]} rows={ps.map(p=>[p,...STAGES.map(s=>rows.filter(d=>d.position===p&&d.stage===s).length),rows.filter(d=>d.position===p).length])}/></Panel></>;
+}
+function Source({rows,theme}){
+  const stat=SOURCES.map(s=>{const a=rows.filter(d=>d.source===s),h=a.filter(d=>d.status==="Diterima"),sl=a.map(d=>num(d.salary)).filter(x=>x>0);return{s,n:a.length,h:h.length,sal:avg(sl)}});
+  const any=rows.length>0;
+  return <>
+    <div className="g2">
+      <Panel title="Lamaran vs direkrut per sumber"><ChartBox theme={theme} type="bar" labels={any?SOURCES:[]} sets={[{label:"Lamaran",data:stat.map(x=>x.n)},{label:"Direkrut",data:stat.map(x=>x.h)}]}/></Panel>
+      <Panel title="Rata-rata gaji per sumber"><ChartBox theme={theme} type="bar" labels={any?SOURCES:[]} sets={[{label:"Rata-rata gaji",data:stat.map(x=>Math.round(x.sal))}]}/></Panel>
+    </div>
+    <Panel title="Performa sumber lamaran" className="mt-3"><Table cols={["Sumber","Lamaran","Direkrut","Rasio hire","Rata-rata gaji"]} rows={stat.map(x=>[x.s,x.n,x.h,x.n?Math.round(x.h/x.n*100)+"%":"-",x.sal?rp(x.sal):"-"])}/></Panel></>;
+}
+function Interview({rows,theme}){
+  const g=group(rows.filter(d=>d.interviewer),d=>d.interviewer),names=Object.keys(g).sort();
+  const reach=STAGES.map((_,i)=>rows.filter(d=>STAGES.indexOf(d.stage)>=i||d.status==="Diterima").length);
+  const hr=rows.filter(d=>tth(d)!==null);
+  return <>
+    <div className="g2">
+      <Panel title="Rasio konversi antar tahap"><Table cols={["Tahap","Mencapai tahap","Konversi dari tahap sebelumnya"]} rows={STAGES.map((s,i)=>[s,reach[i],i&&reach[i-1]?Math.round(reach[i]/reach[i-1]*100)+"%":"-"])}/></Panel>
+      <Panel title="Kandidat per pewawancara"><ChartBox theme={theme} type="bar" horizontal labels={names} sets={[{label:"Ditangani",data:names.map(n=>g[n].length)},{label:"Diterima",data:names.map(n=>g[n].filter(d=>d.status==="Diterima").length)}]}/></Panel>
+    </div>
+    <Panel title="Metrik pewawancara" className="mt-3"><Table cols={["Pewawancara","Ditangani","Diterima","Ditolak","Dalam proses","Rasio terima"]} rows={names.map(n=>{const a=g[n],h=a.filter(d=>d.status==="Diterima").length;return[n,a.length,h,a.filter(d=>d.status==="Ditolak").length,a.filter(d=>d.status==="Proses").length,Math.round(h/a.length*100)+"%"]})}/></Panel>
+    <Panel title="Waktu perekrutan (Tanggal Perekrutan − Tanggal Melamar)" className="mt-3"><Table cols={["ID","Nama","Posisi","Melamar","Direkrut","Lama (hari)"]} rows={hr.map(d=>[d.id,d.name,d.position,d.applyDate,d.hireDate,tth(d)])}/></Panel></>;
+}
+function Salary({rows,theme}){
+  const sal=rows.filter(d=>num(d.salary)>0),g=group(sal,d=>d.position),ps=Object.keys(g).sort();
+  return <>
+    <Panel title="Rata-rata gaji ditawarkan per posisi"><ChartBox theme={theme} type="bar" labels={ps} sets={[{label:"Rata-rata gaji",data:ps.map(p=>Math.round(avg(g[p].map(d=>num(d.salary)))))}]}/></Panel>
+    <Panel title="Detail penawaran" className="mt-3"><Table cols={["ID","Nama","Posisi","Sumber","Status","Gaji ditawarkan"]} rows={sal.map(d=>[d.id,d.name,d.position,d.source,d.status,rp(num(d.salary))])}/></Panel></>;
+}
+function Manage({data,setData,onEdit,onDel}){
+  const [q,setQ]=useState("");
+  const list=data.filter(d=>(d.id+" "+d.name+" "+d.position+" "+d.interviewer).toLowerCase().includes(q.toLowerCase()));
+  const exportJson=()=>{const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="kandidat.json";a.click()};
+  return <Panel title={"Data kandidat ("+data.length+")"}>
+    <div className="flex flex-wrap gap-2 mb-3">
+      <div className="relative flex-1 min-w-[180px]"><span className="absolute left-3 top-3 mut"><I n="search" s={14}/></span><input className="inp" style={{paddingLeft:32}} placeholder="Cari ID, nama, posisi, pewawancara" value={q} onChange={e=>setQ(e.target.value)}/></div>
+      <button className="btn" disabled={!data.length} onClick={exportJson}><I n="dl"/>Ekspor</button>
+      <button className="btn" disabled={!data.length} onClick={()=>{if(confirm("Hapus semua data kandidat? Tindakan ini tidak dapat dibatalkan."))setData([])}}><I n="trash"/>Hapus semua</button>
+    </div>
+    <div className="hidden lg:block"><Table cols={["ID","Nama","Posisi","Sumber","Melamar","Tahap","Pewawancara","Status","Direkrut","Gaji","Catatan","Aksi"]} rows={list.map(d=>[d.id,d.name,d.position,d.source,d.applyDate,d.stage,d.interviewer||"-",d.status,d.hireDate||"-",d.salary!==""?rp(num(d.salary)):"-",<span title={d.notes}>{(d.notes||"-").slice(0,24)}</span>,
+      <span className="flex gap-1"><button className="btn" aria-label={"Edit "+d.id} onClick={()=>onEdit(d)}><I n="edit" s={14}/></button><button className="btn" aria-label={"Hapus "+d.id} onClick={()=>onDel(d.id)}><I n="trash" s={14}/></button></span>])}/></div>
+    <div className="lg:hidden grid gap-2 sm:grid-cols-2">{list.map(d=><div key={d.id} className="card p-3" style={{boxShadow:"none"}}>
+      <div className="flex justify-between gap-2"><div className="min-w-0"><div className="font-semibold truncate">{d.name}</div><div className="mut text-xs truncate">{d.id}, {d.position}</div></div><span className={"badge b-"+d.status}>{d.status}</span></div>
+      <div className="mut text-xs mt-2 flex flex-wrap gap-x-3"><span>{d.source}</span><span>Tahap {d.stage}</span><span>Melamar {d.applyDate}</span>{d.salary!==""&&<span>{rp(num(d.salary))}</span>}</div>
+      <div className="flex gap-2 mt-3"><button className="btn flex-1 justify-center" onClick={()=>onEdit(d)}><I n="edit" s={14}/>Edit</button><button className="btn flex-1 justify-center" onClick={()=>onDel(d.id)}><I n="trash" s={14}/>Hapus</button></div></div>)}
+      {!list.length&&<p className="mut text-sm">Tidak ada data.</p>}</div>
+  </Panel>;
+}
+
+function Field({label,children}){return <label className="block text-xs mut">{label}<div className="mt-1">{children}</div></label>}
+function Form({initial,editing,positions,ids,onSave,onClose}){
+  const [f,setF]=useState(initial),[err,setErr]=useState("");
+  const set=k=>e=>{const v=e.target.value;setF(p=>({...p,[k]:v}))};
+  const txt=k=><input className="inp" value={f[k]} onChange={set(k)}/>;
+  const sel=(k,o)=><select className="inp" value={f[k]} onChange={set(k)}>{o.map(x=><option key={x} value={x}>{x}</option>)}</select>;
+  const submit=e=>{
+    e.preventDefault();
+    const id=f.id.trim(),name=f.name.trim(),position=f.position.trim();
+    if(!id||!name||!position)return setErr("ID Kandidat, Nama, dan Posisi wajib diisi.");
+    if(!editing&&ids.includes(id))return setErr("ID Kandidat sudah dipakai. Gunakan ID lain.");
+    if(f.hireDate&&f.applyDate&&f.hireDate<f.applyDate)return setErr("Tanggal Perekrutan tidak boleh sebelum Tanggal Melamar.");
+    onSave({...f,id,name,position,interviewer:f.interviewer.trim(),salary:f.salary===""?"":num(f.salary)});
+  };
+  return <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-y-auto" style={{background:"rgba(0,0,0,.55)"}} role="dialog" aria-modal="true">
+    <form onSubmit={submit} className="card w-full max-w-2xl p-5 pb-8 sm:pb-5 sm:my-auto max-h-[92vh] overflow-y-auto rounded-b-none sm:rounded-b-[14px]">
+      <div className="flex justify-between items-center mb-4"><h2 className="font-bold">{editing?"Edit kandidat":"Tambah kandidat"}</h2><button type="button" className="btn" onClick={onClose} aria-label="Tutup"><I n="x"/></button></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Field label="ID Kandidat"><input className="inp" value={f.id} onChange={set("id")} disabled={editing}/></Field>
+        <Field label="Nama">{txt("name")}</Field>
+        <Field label="Posisi"><input className="inp" list="pos-list" value={f.position} onChange={set("position")}/><datalist id="pos-list">{positions.map(p=><option key={p} value={p}/>)}</datalist></Field>
+        <Field label="Sumber Lamaran">{sel("source",SOURCES)}</Field>
+        <Field label="Tanggal Melamar"><input type="date" className="inp" value={f.applyDate} onChange={set("applyDate")}/></Field>
+        <Field label="Tahap Seleksi">{sel("stage",STAGES)}</Field>
+        <Field label="Pewawancara">{txt("interviewer")}</Field>
+        <Field label="Status">{sel("status",STATUSES)}</Field>
+        <Field label="Tanggal Perekrutan"><input type="date" className="inp" value={f.hireDate} onChange={set("hireDate")}/></Field>
+        <Field label="Gaji Ditawarkan (Rp)"><input type="number" min="0" className="inp" value={f.salary} onChange={set("salary")}/></Field>
+      </div>
+      <div className="mt-3"><Field label="Catatan"><textarea rows="2" className="inp" value={f.notes} onChange={set("notes")}/></Field></div>
+      {err&&<p role="alert" className="text-sm mt-3" style={{color:"#e11d48"}}>{err}</p>}
+      <div className="flex justify-end gap-2 mt-4"><button type="button" className="btn" onClick={onClose}>Batal</button><button type="submit" className="btn btn-p">Simpan kandidat</button></div>
+    </form></div>;
+}
+
+const NAV=[["overview","Dashboard Overview","grid"],["pipeline","Pipeline Analysis","funnel"],["source","Source Performance","globe"],["interview","Interview & Time to Hire","clock"],["salary","Salary & Offer","wallet"],["data","Data Management","db"]];
+const SHORT=["Ringkasan","Pipeline","Sumber","Waktu","Gaji","Data"];
+function loadData(){try{const v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v.filter(x=>x&&typeof x==="object"):[]}catch(e){return[]}}
+
+function App(){
+  const [data,setData]=useState(loadData);
+  const [theme,setTheme]=useState(()=>{try{const t=localStorage.getItem("rp_theme");if(t)return t}catch(e){}return window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"});
+  const [page,setPage]=useState("overview");
+  const [flt,setFlt]=useState({from:"",to:"",pos:"",src:""});
+  const [modal,setModal]=useState(null);
+  const [showF,setShowF]=useState(false);
+  useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}},[data]);
+  useEffect(()=>{document.documentElement.dataset.theme=theme;try{localStorage.setItem("rp_theme",theme)}catch(e){}},[theme]);
+  const positions=useMemo(()=>[...new Set(data.map(d=>d.position))].sort(),[data]);
+  const rows=useMemo(()=>data.filter(d=>(!flt.from||d.applyDate>=flt.from)&&(!flt.to||d.applyDate<=flt.to)&&(!flt.pos||d.position===flt.pos)&&(!flt.src||d.source===flt.src)),[data,flt]);
+  const save=c=>{setData(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setModal(null)};
+  const del=id=>{if(confirm("Hapus kandidat "+id+"?"))setData(p=>p.filter(x=>x.id!==id))};
+  const add=()=>setModal({editing:false,initial:blank()});
+  const edit=d=>setModal({editing:true,initial:{...blank(),...d}});
+  const activeF=Object.values(flt).filter(Boolean).length;
+  const cur=NAV.find(n=>n[0]===page);
+  const sf=k=>e=>{const v=e.target.value;setFlt(p=>({...p,[k]:v}))};
+  const props={rows,theme};
+  return <div className="min-h-screen lg:flex">
+    <aside className="hidden lg:block lg:w-64 shrink-0 sticky top-0 h-screen self-start overflow-y-auto" style={{background:"linear-gradient(180deg,var(--side),#1e1b4b)"}}>
+      <div className="flex items-center gap-3 px-5 py-5 text-white"><span style={{background:"linear-gradient(135deg,#6366f1,#14b8a6)",borderRadius:10,padding:8,display:"inline-flex"}}><I n="users" s={18}/></span><div><div className="font-bold leading-tight">Recruitment</div><div className="text-xs" style={{color:"#94a3b8"}}>Pipeline Dashboard</div></div></div>
+      <nav className="flex flex-col gap-1 px-3 pb-3">{NAV.map(([k,t,ic])=><button key={k} className={"nav "+(page===k?"on":"")} onClick={()=>setPage(k)}><I n={ic}/>{t}</button>)}</nav>
+    </aside>
+    <div className="bnav">{NAV.map(([k,t,ic],i)=><button key={k} className={page===k?"on":""} onClick={()=>{setPage(k);window.scrollTo(0,0)}} aria-label={t}><I n={ic} s={18}/>{SHORT[i]}</button>)}</div>
+    <main className="flex-1 min-w-0 p-3 pb-24 sm:p-5 sm:pb-24 lg:p-7 lg:pb-7">
+      <div className="wrap"><div className="flex items-start justify-between gap-3 mb-4">
+        <div className="min-w-0"><h1 className="text-lg sm:text-xl font-bold">{cur[1]}</h1><p className="mut text-xs mt-0.5">{page==="data"?data.length+" kandidat tersimpan":rows.length+" dari "+data.length+" kandidat ditampilkan"}</p></div>
+        <div className="flex gap-2">
+          <button className="btn" onClick={()=>setTheme(theme==="dark"?"light":"dark")} aria-label="Ganti tema"><I n={theme==="dark"?"sun":"moon"}/><span className="hidden sm:inline">{theme==="dark"?"Terang":"Gelap"}</span></button>
+          <button className="btn btn-p" onClick={add}><I n="plus"/><span className="sm:hidden">Tambah</span><span className="hidden sm:inline">Tambah kandidat</span></button>
+        </div>
+      </div>
+      {page!=="data"&&<button className="btn w-full justify-between mb-3 lg:hidden" onClick={()=>setShowF(!showF)} aria-expanded={showF}><span className="flex items-center gap-2"><I n="funnel"/>Filter{activeF?" ("+activeF+" aktif)":""}</span><span className="mut">{showF?"Tutup":"Buka"}</span></button>}
+      {page!=="data"&&<div className={"card p-3 mb-4 fl "+(showF?"":"off")}>
+        <Field label="Melamar dari"><input type="date" className="inp" value={flt.from} onChange={sf("from")}/></Field>
+        <Field label="Sampai"><input type="date" className="inp" value={flt.to} onChange={sf("to")}/></Field>
+        <Field label="Posisi"><select className="inp" value={flt.pos} onChange={sf("pos")}><option value="">Semua posisi</option>{positions.map(p=><option key={p} value={p}>{p}</option>)}</select></Field>
+        <Field label="Sumber"><select className="inp" value={flt.src} onChange={sf("src")}><option value="">Semua sumber</option>{SOURCES.map(p=><option key={p} value={p}>{p}</option>)}</select></Field>
+        <button className="btn justify-center" onClick={()=>setFlt({from:"",to:"",pos:"",src:""})}>Reset filter</button>
+      </div>}
+      <EB key={page}>
+        {page==="data"?<Manage data={data} setData={setData} onEdit={edit} onDel={del}/>
+        :!data.length?<div className="card p-10 text-center"><p className="font-semibold">Belum ada data kandidat</p><p className="mut text-sm mt-1 mb-4">Tambahkan kandidat pertama agar grafik dan metrik muncul. Data tersimpan di browser ini.</p><button className="btn btn-p" onClick={add}><I n="plus"/>Tambah kandidat</button></div>
+        :page==="overview"?<Overview {...props}/>:page==="pipeline"?<Pipeline {...props}/>:page==="source"?<Source {...props}/>:page==="interview"?<Interview {...props}/>:<Salary {...props}/>}
+      </EB>
+    </div></main>
+    {modal&&<Form initial={modal.initial} editing={modal.editing} positions={positions} ids={data.map(d=>d.id)} onSave={save} onClose={()=>setModal(null)}/>}
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<EB><App/></EB>);
+</script>
+</body>
+</html>
