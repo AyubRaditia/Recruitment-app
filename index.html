@@ -100,8 +100,8 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 @media (max-width:959px){#ftog{display:flex}.fbar:not(.open){display:none}.fbar{margin-top:8px}}
 .pn{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:16px;min-width:0}.pn h3{margin:0 0 12px;font-size:14px}
 .ch{position:relative;height:clamp(220px,34vw,300px)}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.kpi{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:14px 16px;min-width:0}.kpi b{display:block;font-size:26px;letter-spacing:-.02em;margin-top:2px}.kpi small{display:block}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.kpi{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:10px 12px;min-width:0}.kpi b{display:block;font-size:22px;letter-spacing:-.02em;margin-top:2px}.kpi small{display:block}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
 .g2,.g3{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}.mt{margin-top:14px}
 @media (min-width:1100px){.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}}
 .kb{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px}
@@ -109,6 +109,21 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 .kh{display:flex;justify-content:space-between;padding:2px 4px 10px}.kl{overflow-y:auto}
 .kk{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:10px;margin-bottom:8px;cursor:grab;font-size:13px}.kk:hover{border-color:var(--ac)}.kr{display:flex;justify-content:space-between;gap:6px}
 .wide th:nth-child(2),.wide td:nth-child(2){position:sticky;left:0;background:var(--sf);z-index:1}
+.ch.sm{height:200px}.ch.sm.h{height:270px}
+.pn.s{padding:12px}.pn.s h3{font-size:13px;margin-bottom:8px}
+.g3e{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:700px){.g3e{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.g3e{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.cp{min-width:0}.cp th,.cp td{padding:6px 10px;font-size:12px}
+.ac{color:var(--ac)}
+.cs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.nl{max-height:320px;overflow-y:auto}
+.nt{display:flex;gap:12px;align-items:center;padding:9px 4px;border-top:1px solid var(--ln);cursor:pointer}
+.nt:first-child{border-top:0}.nt:hover,.nt:focus-visible{background:var(--acs);outline:0}
+.nd{flex:none;min-width:84px}.nm{flex:1;min-width:0}.nm b,.nm span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bdg{background:var(--er);color:#fff!important;border-radius:99px;padding:0 7px;font-weight:700}
+.hire{display:flex;align-items:center;gap:14px;background:var(--acs);border-radius:99px;padding:8px 20px 8px 8px}
+.hirec{flex:none;width:60px;height:60px;border-radius:50%;background:#f59e0b;color:#1b1300;display:grid;place-items:center;font-size:24px;font-weight:800}
 </style>
 </head>
 <body>
@@ -116,8 +131,7 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 <aside class="side" id="side">
   <div class="brand"><span class="logo">R</span><div><b>Recruitment</b><small>Talent pipeline</small></div></div>
   <div class="grp">Menu</div><nav id="nav"></nav>
-  <div class="grp">Tahap seleksi</div><div id="colAll"></div><nav id="cols"></nav>
-  <div class="foot"><button class="bt" id="imp">Impor Excel / CSV</button><button class="bt" id="exp">Ekspor ke Excel</button><input type="file" id="file" accept=".xlsx,.xls,.csv" hidden><small class="mut">Format kolom sama seperti spreadsheet rekrutmen. Hasil ekspor bisa diimpor kembali.</small></div>
+    <div class="foot"><button class="bt" id="imp">Impor Excel / CSV</button><button class="bt" id="exp">Ekspor ke Excel</button><input type="file" id="file" accept=".xlsx,.xls,.csv" hidden><small class="mut">Format kolom sama seperti spreadsheet rekrutmen. Hasil ekspor bisa diimpor kembali.</small></div>
 </aside>
 <div class="scrim" id="scrim"></div>
 <main>
@@ -138,6 +152,7 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
     <div class="tool">
       <div class="sr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" placeholder="Cari nama, posisi, universitas, jurusan…"><kbd>/</kbd></div>
       <select id="sort" aria-label="Urutan"><option value="new">Lamaran terbaru</option><option value="name">Nama A–Z</option><option value="stage">Tahap terjauh</option></select>
+      <select id="stg" aria-label="Filter tahap seleksi"></select>
       <div class="vw"><button data-v="grid" aria-label="Tampilan kartu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg></button><button data-v="list" aria-label="Tampilan tabel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button></div>
     </div>
     <div class="tabs" id="tabs"></div>
@@ -191,10 +206,10 @@ const info=c=>{let cur=-1,rej=-1,tp=0;ST.forEach(([k],i)=>{const s=c[k]||{};cons
 const card=c=>{const o=info(c);return`<article class="cd" data-id="${c.id}" tabindex="0"><div class="pv"><div class="av">${esc(ini(c.nama))}</div><div><div class="stg">${esc(o.name)}</div><div class="seg">${ST.map((_,j)=>`<i class="${j<o.i?"on":j==o.i?(o.st=="Reject"?"rj":o.st=="Join"?"jn":"cur"):""}"></i>`).join("")}</div></div></div><div class="bd"><div class="tg"><span>${esc(c.per||"-")}</span><span>${esc(c.src||"-")}</span></div><h3>${esc(c.nama)}</h3><p>${esc(c.pos)}${c.lvl?" · "+esc(c.lvl):""}</p><p class="mut">${esc([c.edu,c.jur].filter(Boolean).join(" "))}${c.uni?" · "+esc(c.uni):""}</p><div class="ft"><span class="mut">Lamar ${fd(c.tgl)}</span><b class="pl ${PC[o.st]}">${o.st}</b></div></div></article>`};
 const table=l=>`<div class="tw"><table><thead><tr>${["Nama","Posisi","Perusahaan","Sumber","Pendidikan","Universitas","Lamar","Tahap","Status"].map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${l.map(c=>{const o=info(c);return`<tr data-id="${c.id}"><td><b>${esc(c.nama)}</b></td><td>${esc(c.pos)}</td><td>${esc(c.per)}</td><td>${esc(c.src)}</td><td>${esc(c.edu)} ${esc(c.jur)}</td><td>${esc(c.uni)}</td><td>${fd(c.tgl)}</td><td>${esc(o.name)}</td><td><b class="pl ${PC[o.st]}">${o.st}</b></td></tr>`}).join("")}</tbody></table></div>`;
 let pg="dash",fl={from:"",to:"",pos:"",src:"",per:""},dqv="",dg=null,CH=[],CI=[];
-const TD=new Date().toISOString().slice(0,10);
+const TD=(()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})();
 const IC={dash:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",lib:"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 3a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8",kan:"M4 4h4v16H4zm6 0h4v16h-4zm6 0h4v16h-4z",fun:"M22 3H2l8 9.5V19l4 2v-8.5z",src:"M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 3 17 0 20M12 2c-3 3-3 17 0 20",clock:"M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2",offer:"M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-4zm-6-3h4v3h-4V4z",db:"M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"};
 const ic=n=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${IC[n]}"/></svg>`;
-const VIEWS=[["dash","Dashboard","Ringkasan jumlah pelamar, status, dan tren lamaran."],["lib","Kandidat","Telusuri kandidat sebagai kartu atau tabel, per tahap seleksi."],["kan","Kanban","Papan tahapan seleksi. Seret kartu ke kolom berikutnya untuk memajukan kandidat."],["fun","Analisis Pipeline","Berapa banyak kandidat yang lolos di setiap tahap."],["src","Sumber Lowongan","Perbandingan hasil rekrutmen per sumber lowongan dan perusahaan."],["clock","Interview & Waktu","Jadwal interview, beban PIC, dan lama proses antar tahap."],["offer","MCU, Offering & Join","Kandidat yang sudah sampai MCU, offering letter, atau join."],["db","Data Lengkap","Seluruh kolom data, sama seperti spreadsheet rekrutmen."]];
+const VIEWS=[["dash","Dashboard","Ringkasan pelamar, pipeline seleksi, dan sumber lowongan."],["lib","Kandidat","Telusuri kandidat sebagai kartu atau tabel. Gunakan filter tahap seleksi untuk menyaring."],["kan","Kanban","Papan tahapan seleksi. Seret kartu ke kolom berikutnya untuk memajukan kandidat."],["src","Sumber Lowongan","Perbandingan hasil rekrutmen per sumber lowongan dan perusahaan."],["clock","Interview & Waktu","Pengingat jadwal interview HC dan rata-rata lama proses rekrutmen."],["db","Data Lengkap","Seluruh kolom data, sama seperti spreadsheet rekrutmen."]];
 const XC=[["no","NO",""],...F.map(f=>[f[0],f[1],""]),...ST.flatMap(([k,t])=>SCH[k].split("").map(f=>[k+"."+f,FL[f],t]))];
 const PAL=["#2f5bea","#14b8a6","#f59e0b","#ec4899","#8b5cf6","#0ea5e9","#84cc16","#f97316","#64748b","#e11d48"];
 const ST4=["Proses","Talent Pool","Reject","Join"],SC={Proses:"#f59e0b","Talent Pool":"#8b5cf6",Reject:"#e11d48",Join:"#10b981"},KM={Proses:"p","Talent Pool":"tp",Reject:"r",Join:"j"};
@@ -204,7 +219,7 @@ const pct=(a,b)=>b?Math.round(a/b*100)+"%":"-",pill=s=>`<b class="pl ${PC[s]}">$
 const has=(c,k)=>Object.values(c[k]||{}).join("").trim()!=="";
 const rows=()=>data.filter(c=>(!fl.from||c.tgl>=fl.from)&&(!fl.to||c.tgl<=fl.to)&&(!fl.pos||c.pos===fl.pos)&&(!fl.src||c.src===fl.src)&&(!fl.per||c.per===fl.per));
 const mkc=(type,labels,sets,o={})=>({type,labels,sets,...o});
-const chart=c=>c.labels.length?(CH.push(c),`<div class="ch"><canvas data-c="${CH.length-1}"></canvas></div>`):'<p class="mut">Belum ada data untuk grafik ini.</p>';
+const chart=c=>c.labels.length?(CH.push(c),`<div class="ch${c.sm?" sm":""}${c.h?" h":""}"><canvas data-c="${CH.length-1}"></canvas></div>`):'<p class="mut">Belum ada data untuk grafik ini.</p>';
 const pn=(t,b,cl="")=>`<section class="pn ${cl}"><h3>${t}</h3>${b}</section>`;
 const kpi=a=>`<div class="kp">${a.map(([l,v,c,s])=>`<div class="kpi"><div class="mut"><span class="dot" style="background:${c}"></span>${l}</div><b>${v}</b>${s?`<small class="mut">${s}</small>`:""}</div>`).join("")}</div>`;
 const tbl=(h,r,ids,cl="")=>`<div class="tw"><table class="${cl}"><thead><tr>${h.join("")}</tr></thead><tbody>${r.length?r.map((x,i)=>`<tr${ids?` data-id="${ids[i]}"`:""}>${x.map(v=>`<td>${v}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}" class="mut">Tidak ada data pada filter ini.</td></tr>`}</tbody></table></div>`;
@@ -213,15 +228,19 @@ function mount(){
   CI.forEach(c=>c.destroy());CI=[];if(!CH.length)return;
   if(!window.Chart){document.querySelectorAll("canvas[data-c]").forEach(c=>c.parentNode.innerHTML='<p class="mut">Library grafik gagal dimuat. Periksa koneksi internet.</p>');return}
   const cs=getComputedStyle(document.documentElement),tc=cs.getPropertyValue("--mut").trim(),gc=cs.getPropertyValue("--ln").trim(),bg=cs.getPropertyValue("--sf").trim();
-  document.querySelectorAll("canvas[data-c]").forEach(cv=>{const o=CH[cv.dataset.c],t=o.type,dn=t=="doughnut";
+  document.querySelectorAll("canvas[data-c]").forEach(cv=>{const o=CH[cv.dataset.c],t=o.type,dn=t=="doughnut",fs=o.sm?10:12;
     CI.push(new Chart(cv,{type:t,data:{labels:o.labels,datasets:o.sets.map((s,i)=>({backgroundColor:dn?(s.colors||PAL):PAL[i%10],borderColor:t=="line"?PAL[i%10]:dn?bg:undefined,borderRadius:t=="bar"?5:0,tension:.3,...s}))},
-      options:{animation:false,responsive:true,maintainAspectRatio:false,indexAxis:o.h?"y":"x",plugins:{legend:{display:dn||o.sets.length>1,labels:{color:tc,boxWidth:12}}},
-        scales:dn?{}:{x:{stacked:!!o.stack,ticks:{color:tc},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0},grid:{display:!o.h,color:gc}}}}}))})}
+      options:{animation:false,responsive:true,maintainAspectRatio:false,indexAxis:o.h?"y":"x",plugins:{legend:{display:dn||o.sets.length>1,labels:{color:tc,boxWidth:o.sm?8:12,font:{size:fs}}}},
+        scales:dn?{}:{x:{stacked:!!o.stack,ticks:{color:tc,font:{size:fs}},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!o.h,color:gc}}}}}))})}
 function vDash(R){
   const I=R.map(info),n=s=>I.filter(o=>o.st===s).length,tt=R.filter(c=>has(c,"psi")),ps=tt.filter(c=>{const o=info(c);return!(o.st==="Reject"&&o.i===0)});
   const ms=[...new Set(R.map(c=>(c.tgl||"").slice(0,7)).filter(Boolean))].sort(),mc=(m,s)=>R.filter((c,i)=>(c.tgl||"").slice(0,7)===m&&(!s||I[i].st===s)).length;
-  return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" yang dites":""]])
-  +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms,[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}])))}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}])))}</div><div class="mt">${pn("Kandidat per tahap saat ini",chart(mkc("bar",COLS,[{label:"Kandidat",data:COLS.map((_,i)=>I.filter(o=>o.i+1===i).length)}],{h:1})))}</div>`}
+  const reach=COLS.map((_,i)=>I.filter(o=>o.i+1>=i).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),pos=[...new Set(R.map(c=>c.pos))].sort();
+  const S=perf(R,"src"),lb=S.map(x=>x.k);
+  return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" dites":""]])
+  +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms,[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
+  +`<div class="g3e mt">${pn("Kandidat per tahap saat ini",chart(mkc("bar",COLS,[{label:"Kandidat",data:COLS.map((_,i)=>I.filter(o=>o.i+1===i).length)}],{h:1,sm:1})),"s")}${pn("Funnel: kandidat yang mencapai tiap tahap",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,ST4.map(s=>({label:s,backgroundColor:SC[s],data:S.map(x=>x[KM[s]])})),{h:1,stack:1,sm:1})),"s")}</div>`
+  +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari tahap sebelumnya","Dari total","Reject"]),COLS.map((t,i)=>[t,reach[i],i&&reach[i-1]?pct(reach[i],reach[i-1]):"-",pct(reach[i],R.length),rej[i]]),null,"cp"),"s")}</div>`}
 function vKan(R){
   const g=COLS.map(()=>[]);R.forEach(c=>g[info(c).i+1].push(c));
   return `<div class="kb">${COLS.map((t,i)=>`<div class="kc" data-s="${i}"><div class="kh"><b>${t}</b><span class="mut">${g[i].length}</span></div><div class="kl">${g[i].map(c=>`<div class="kk" draggable="true" data-id="${c.id}"><div class="kr"><b>${esc(c.nama)}</b>${pill(info(c).st)}</div><div class="mut">${esc(c.pos)}</div></div>`).join("")||'<p class="mut" style="text-align:center">Kosong</p>'}</div></div>`).join("")}</div>`}
@@ -230,41 +249,37 @@ function move(id,s){
   if(o.st==="Reject")return toast("Kandidat Reject tidak bisa dipindah. Ubah lewat form detail.");
   if(s===o.i+1)return;if(s<o.i+1)return toast("Pindah mundur dilakukan lewat form detail.");
   const k=ST[s-1][0];c[k]=c[k]||{};if(!c[k].t)c[k].t=TD;save();render();toast(c.nama+" dipindah ke "+COLS[s])}
-function vPipe(R){
-  const I=R.map(info),reach=COLS.map((_,i)=>I.filter(o=>o.i+1>=i).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),ps=[...new Set(R.map(c=>c.pos))].sort();
-  return `<div class="g2">${pn("Funnel: kandidat yang mencapai tiap tahap",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1})))}${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",ps,COLS.map((t,i)=>({label:t,data:ps.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1})))}</div>`
-  +pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari tahap sebelumnya","Dari total","Reject di tahap"]),COLS.map((t,i)=>[t,reach[i],i&&reach[i-1]?pct(reach[i],reach[i-1]):"-",pct(reach[i],R.length),rej[i]])),"mt")}
 const perf=(R,key)=>{const g=gb(R,c=>c[key]||"-");return Object.keys(g).sort((a,b)=>g[b].length-g[a].length).map(k=>{const a=g[k],n=s=>a.filter(c=>info(c).st===s).length;return{k,t:a.length,p:n("Proses"),tp:n("Talent Pool"),r:n("Reject"),j:n("Join")}})};
 const perfT=(L,h)=>tbl(th([h,"Pelamar","Proses","Talent pool","Reject","Join","Rasio join","Rasio reject"]),L.map(x=>[esc(x.k),x.t,x.p,x.tp,x.r,x.j,pct(x.j,x.t),pct(x.r,x.t)]));
 function vSrc(R){
   const S=perf(R,"src"),P=perf(R,"per"),lb=S.map(x=>x.k);
-  return `<div class="g2">${pn("Pelamar per sumber, menurut status",chart(mkc("bar",lb,ST4.map(s=>({label:s,backgroundColor:SC[s],data:S.map(x=>x[KM[s]])})),{stack:1})))}${pn("Rasio reject per sumber (%)",chart(mkc("bar",lb,[{label:"Reject (%)",data:S.map(x=>x.t?Math.round(x.r/x.t*100):0)}])))}</div>`
+  return pn("Rasio reject per sumber (%)",chart(mkc("bar",lb,[{label:"Reject (%)",data:S.map(x=>x.t?Math.round(x.r/x.t*100):0)}])))
   +pn("Performa sumber lowongan",perfT(S,"Sumber"),"mt")+pn("Performa per perusahaan",perfT(P,"Perusahaan"),"mt")}
+const HS={NEXT:"ac",REJECT:"r","TALENT POOL":"v"},hasil=c=>{const k=String(c.hc.k||"").toUpperCase().trim();return HS[k]?`<b class="pl ${HS[k]}">${k}</b>`:"-"};
+const soon=()=>data.filter(c=>c.hc&&c.hc.t&&dd(TD,c.hc.t)>=0&&dd(TD,c.hc.t)<=1);
 function vInt(R){
-  const g=gb(R.filter(c=>c.hc&&c.hc.p),c=>c.hc.p),pics=Object.keys(g).sort(),kc=(a,w)=>a.filter(c=>String(c.hc.k).toUpperCase()===w).length;
-  const av=ST.map(([k,t])=>[t,avgOf(R.filter(c=>c.tgl&&c[k]&&c[k].t).map(c=>dd(c.tgl,c[k].t)))]).filter(x=>x[1]!==null);
-  const sc=[];R.forEach(c=>["hc","pc","ipg","tms","usr","mcu"].forEach(k=>{if(c[k]&&c[k].t)sc.push([c[k].t,k,c])}));sc.sort((a,b)=>b[0].localeCompare(a[0]));
-  const jn=R.filter(c=>c.tgl&&c.join&&c.join.t);
-  return `<div class="g2">${pn("Kandidat per PIC Interview HC",chart(mkc("bar",pics,[{label:"Ditangani",data:pics.map(p=>g[p].length)},{label:"NEXT",data:pics.map(p=>kc(g[p],"NEXT"))}],{h:1})))}${pn("Rata-rata hari dari lamaran ke tiap tahap",chart(mkc("bar",av.map(x=>x[0]),[{label:"Hari",data:av.map(x=>x[1])}],{h:1})))}</div>`
-  +pn("Hasil Interview HC per PIC",tbl(th(["PIC","Ditangani","NEXT","Talent pool","Reject"]),pics.map(p=>[esc(p),g[p].length,kc(g[p],"NEXT"),kc(g[p],"TALENT POOL"),kc(g[p],"REJECT")])),"mt")
-  +pn("Jadwal interview dan asesmen"+(sc.length>150?" (150 terbaru)":""),tbl(th(["Tanggal","Waktu","Tahap","Nama","Posisi","PIC / User","Hasil",""]),sc.slice(0,150).map(([t,k,c])=>[fd(t),esc(k=="hc"?c.hc.w||"-":"-"),ST.find(x=>x[0]===k)[1],esc(c.nama),esc(c.pos),esc(k=="hc"?c.hc.p||"-":k=="usr"?c.usr.n||"-":"-"),esc(c[k].h||c[k].k||"-"),t>=TD?'<b class="pl a">Mendatang</b>':""]),sc.slice(0,150).map(x=>x[2].id)),"mt")
-  +pn("Waktu rekrutmen (tanggal join dikurangi tanggal lamaran)",tbl(th(["Nama","Posisi","Melamar","Join","Lama (hari)"]),jn.map(c=>[esc(c.nama),esc(c.pos),fd(c.tgl),fd(c.join.t),dd(c.tgl,c.join.t)]),jn.map(c=>c.id)),"mt")}
-function vOff(R){
-  const L=R.filter(c=>has(c,"mcu")||has(c,"off")||has(c,"join")),n=k=>R.filter(c=>has(c,k)).length;
-  return kpi([["Sampai tahap MCU",n("mcu"),"#0ea5e9"],["Offering letter",n("off"),"#f59e0b"],["Join",n("join"),"#10b981"]])
-  +pn("Daftar kandidat",tbl(th(["Nama","Posisi","Perusahaan","MCU","Hasil MCU","Offering","Hasil offering","Join","Status join"]),L.map(c=>[esc(c.nama),esc(c.pos),esc(c.per),fd(c.mcu.t),esc(c.mcu.h||"-"),fd(c.off.t),esc(c.off.h||"-"),fd(c.join.t),esc(c.join.s||"-")]),L.map(c=>c.id)),"mt")}
+  const dl=t=>dd(TD,t),wd=t=>new Date(t+"T00:00:00").toLocaleDateString("id-ID",{weekday:"short",day:"numeric",month:"short"});
+  const up=data.filter(c=>c.hc&&c.hc.t&&c.hc.t>=TD).sort((a,b)=>a.hc.t.localeCompare(b.hc.t)||String(a.hc.w).localeCompare(String(b.hc.w))),cn=k=>up.filter(c=>dl(c.hc.t)===k).length;
+  const lab=t=>{const k=dl(t);return k===0?'<b class="pl a">Hari ini</b>':k===1?'<b class="pl ac">Besok</b>':'<b class="pl mut">H+'+k+'</b>'};
+  const nt=`<div class="cs"><span class="pl a">Hari ini: ${cn(0)}</span><span class="pl ac">Besok: ${cn(1)}</span><span class="pl mut">Berikutnya: ${up.length-cn(0)-cn(1)}</span></div>`+(up.length?`<div class="nl">${up.map(c=>`<div class="nt" data-id="${c.id}" tabindex="0"><div class="nd">${lab(c.hc.t)}<small class="mut" style="display:block;margin-top:3px">${wd(c.hc.t)}</small></div><div class="nm"><b>${esc(c.nama)}</b><span class="mut">${esc(c.pos)}</span></div><div class="mut" style="text-align:right;flex:none">${esc(c.hc.w||"-")}<br>${esc(c.hc.p||"-")}</div></div>`).join("")}</div>`:'<p class="mut" style="margin:0">Belum ada interview HC yang dijadwalkan mulai hari ini.</p>');
+  const jn=R.filter(c=>c.tgl&&c.join&&c.join.t&&dd(c.tgl,c.join.t)>=0),ds=jn.map(c=>dd(c.tgl,c.join.t)),av=avgOf(ds);
+  const hire=`<div class="hire"><div class="hirec">${av===null?"-":av}</div><div><b>Average Days to Hire</b><small class="mut" style="display:block">Rata-rata hari dari tanggal lamaran masuk sampai tanggal join</small></div></div><p class="mut" style="margin:10px 0 0">${jn.length?`Dihitung dari ${jn.length} kandidat join · tercepat ${Math.min(...ds)} hari · terlama ${Math.max(...ds)} hari`:"Belum ada kandidat yang join. Angka muncul setelah ada tanggal join."}</p>`+(jn.length?`<div class="mt">${tbl(th(["Nama","Posisi","Melamar","Join","Lama (hari)"]),jn.map(c=>[esc(c.nama),esc(c.pos),fd(c.tgl),fd(c.join.t),dd(c.tgl,c.join.t)]),jn.map(c=>c.id),"cp")}</div>`:"");
+  const sc=R.filter(c=>c.hc&&c.hc.t).sort((a,b)=>b.hc.t.localeCompare(a.hc.t)||String(b.hc.w).localeCompare(String(a.hc.w)));
+  return `<div class="g3">${pn("Pengingat interview HC",nt,"s")}${pn("Waktu rekrutmen",hire,"s")}</div>`
+  +pn("Jadwal Interview HC"+(sc.length>150?" (150 terbaru)":""),tbl(th(["Tanggal","Waktu","Nama","Posisi","PIC","Hasil",""]),sc.slice(0,150).map(c=>[fd(c.hc.t),esc(c.hc.w||"-"),esc(c.nama),esc(c.pos),esc(c.hc.p||"-"),hasil(c),dl(c.hc.t)===0?'<b class="pl a">Hari ini</b>':dl(c.hc.t)===1?'<b class="pl ac">Besok</b>':dl(c.hc.t)>1?'<b class="pl mut">Mendatang</b>':""]),sc.slice(0,150).map(c=>c.id)),"mt")}
 function dtab(R){
   const f=dqv?R.filter(c=>[c.nama,c.pos,c.per,c.uni,c.jur,c.hp,c.src].join(" ").toLowerCase().includes(dqv)):R;
   return `<p class="mut">${f.length} dari ${data.length} kandidat. Klik baris untuk membuka detail.</p>`+tbl(XC.map(([,l,g])=>g?`<small class="mut">${esc(g)}</small><br>${l}`:l).map(x=>`<th>${x}</th>`),f.map((c,i)=>XC.map(([k])=>{const v=k=="no"?i+1:val(c,k);return esc(k=="tgl"||k.endsWith(".t")?(v?fd(v):""):v)})),f.map(c=>c.id),"wide")}
 function vData(R){return `<div class="tool"><div class="sr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="dq" placeholder="Cari nama, posisi, universitas…" value="${esc(dqv)}"></div></div><div id="dt">${dtab(R)}</div>`}
-const VW={dash:vDash,kan:vKan,fun:vPipe,src:vSrc,clock:vInt,offer:vOff,db:vData};
-const item=(i,t,n)=>`<button class="ni ${pg==="lib"&&col===i?"on":""}" data-col="${i}"><span>${t}</span><em>${n}</em></button>`;
+const VW={dash:vDash,kan:vKan,src:vSrc,clock:vInt,db:vData};
 function fbar(){
   const u=k=>[...new Set(data.map(c=>c[k]).filter(Boolean))].sort(),f=(n,l,a)=>{$("#fbar [name="+n+"]").innerHTML=`<option value="">${l}</option>`+a.map(x=>`<option ${x===fl[n]?"selected":""}>${esc(x)}</option>`).join("")};
   f("pos","Semua posisi",u("pos"));f("per","Semua perusahaan",u("per"));f("src","Semua sumber",[...new Set([...SRC,...u("src")])]);
   $("#fbar [name=from]").value=fl.from;$("#fbar [name=to]").value=fl.to;
   const n=Object.values(fl).filter(Boolean).length;$("#ftog").textContent="Filter"+(n?" ("+n+" aktif)":"")}
 function lib(R){
+  const cn=COLS.map(()=>0);R.forEach(c=>cn[info(c).i+1]++);
+  $("#stg").innerHTML=`<option value="-1">Semua tahap (${R.length})</option>`+COLS.map((t,i)=>`<option value="${i}">${esc(t)} (${cn[i]})</option>`).join("");$("#stg").value=String(col);
   $("#ct").textContent=col<0?"Semua kandidat":COLS[col];
   $("#cd").textContent=col<0?"Seluruh pelamar dari semua tahap seleksi.":"Kandidat yang saat ini berada di tahap "+COLS[col]+".";
   const base=R.filter(c=>(col<0||info(c).i+1===col)&&(!q||[c.nama,c.pos,c.per,c.uni,c.jur,c.hp].join(" ").toLowerCase().includes(q)));
@@ -273,9 +288,9 @@ function lib(R){
   $("#cnt").textContent="Menampilkan "+l.length+" dari "+data.length+" kandidat";
   $("#out").innerHTML=!l.length?'<div class="empty">Tidak ada kandidat pada filter ini.</div>':view=="grid"?`<div class="grid">${l.map(card).join("")}</div>`:table(l)}
 function render(){
-  CH=[];const R=rows(),L=pg==="lib",n=COLS.map(()=>0);R.forEach(c=>n[info(c).i+1]++);
-  $("#nav").innerHTML=VIEWS.map(([k,t])=>`<button class="ni ${pg===k?"on":""}" data-pg="${k}">${ic(k)}<span>${esc(t)}</span></button>`).join("");
-  $("#colAll").innerHTML=item(-1,"Semua kandidat",R.length);$("#cols").innerHTML=COLS.map((t,i)=>item(i,t,n[i])).join("");
+  CH=[];const R=rows(),L=pg==="lib",bn=soon().length;
+  $("#nav").innerHTML=VIEWS.map(([k,t])=>`<button class="ni ${pg===k?"on":""}" data-pg="${k}">${ic(k)}<span>${esc(t)}</span>${k==="clock"&&bn?`<em class="bdg">${bn}</em>`:""}</button>`).join("");
+  
   fbar();$("#v-lib").hidden=!L;$("#v-oth").hidden=L;
   const V=VIEWS.find(v=>v[0]===pg);$("#vt").innerHTML=esc(V[1])+"<i>.</i>";$("#vd").textContent=V[2];
   if(L)lib(R);else{$("#v-oth").innerHTML=VW[pg](R);mount()}
@@ -296,8 +311,7 @@ function open(id){
     if(id)data=data.map(x=>x.id===id?o:x);else data.unshift(o);save();$("#modal").innerHTML="";render();toast("Kandidat tersimpan")};
 }
 document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id]");if(!t)return;const d=t.dataset;
-  if(d.col!==undefined){col=+d.col;pg="lib";$("#side").classList.remove("open");$("#scrim").classList.remove("on");render()}
-  else if(d.pg){pg=d.pg;$("#side").classList.remove("open");$("#scrim").classList.remove("on");scrollTo(0,0);render()}
+  if(d.pg){pg=d.pg;$("#side").classList.remove("open");$("#scrim").classList.remove("on");scrollTo(0,0);render()}
   else if(d.tab!==undefined){tab=d.tab;render()}
   else if(d.v){view=d.v;render()}
   else if(d.reset!==undefined){col=-1;tab="";q="";fl={from:"",to:"",pos:"",src:"",per:""};$("#q").value="";render()}
@@ -307,7 +321,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id]
 });
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.id)open(e.target.dataset.id);if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();$("#q").focus()}if(e.key==="Escape")$("#modal").innerHTML=""});
 $("#q").oninput=e=>{q=e.target.value.toLowerCase().trim();render()};
-$("#sort").onchange=e=>{sort=e.target.value;render()};$("#fbar").onchange=e=>{const n=e.target.name;if(n){fl[n]=e.target.value;render()}};$("#ftog").onclick=()=>$("#fbar").classList.toggle("open");
+$("#sort").onchange=e=>{sort=e.target.value;render()};$("#stg").onchange=e=>{col=+e.target.value;render()};$("#fbar").onchange=e=>{const n=e.target.name;if(n){fl[n]=e.target.value;render()}};$("#ftog").onclick=()=>$("#fbar").classList.toggle("open");
 $("#add").onclick=()=>open();
 $("#menu").onclick=()=>{$("#side").classList.add("open");$("#scrim").classList.add("on")};
 $("#scrim").onclick=()=>{$("#side").classList.remove("open");$("#scrim").classList.remove("on")};
@@ -378,6 +392,7 @@ $("#exp").onclick=async()=>{
   TABS.forEach(t=>s2.addRow(["Status: "+t,data.filter(c=>info(c).st===t).length]));COLS.forEach((t,i)=>s2.addRow(["Tahap saat ini: "+t,data.filter(c=>info(c).i+1===i).length]));s2.getColumn(1).width=36;
   try{const buf=await wb.xlsx.writeBuffer();await saveFile("kandidat-rekrutmen-"+new Date().toISOString().slice(0,10)+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))}catch(err){toast("Gagal membuat file Excel")}};
 render();
+{const t=data.filter(c=>c.hc&&c.hc.t===TD).length,b=data.filter(c=>c.hc&&c.hc.t&&dd(TD,c.hc.t)===1).length;if(t||b)toast("Interview HC · hari ini: "+t+", besok: "+b+". Lihat menu Interview & Waktu.")}
 </script>
 </body>
 </html>
