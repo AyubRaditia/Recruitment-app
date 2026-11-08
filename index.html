@@ -171,7 +171,7 @@ const F=[["nama","Nama Pelamar"],["per","Perusahaan"],["pos","Nama Posisi"],["lv
 const FL={t:"Tanggal",h:"Hasil",k:"Keterangan",w:"Waktu",p:"PIC",n:"Nama User",s:"Status"};
 const SCH={psi:"thk",hc:"twpk",pc:"thk",ipg:"th",tms:"th",usr:"nth",mcu:"th",off:"th",join:"ts"};
 const fixX=c=>{ST.forEach(([k])=>{const s=c[k]=c[k]||{};if(s.x!==undefined){if(k=="hc"){const[w,...p]=s.x.split(" ");s.w=w||"";s.p=p.join(" ")}if(k=="usr")s.n=s.x;delete s.x}SCH[k].split("").forEach(f=>{if(s[f]===undefined)s[f]=""})});return c};
-const TABS=["Proses","Talent Pool","Reject","Join"],PC={Proses:"a","Talent Pool":"v",Reject:"r",Join:"g"},KEY="rt_cands_v4";
+const TABS=["Proses","Talent Pool","Reject","Join"],PC={Proses:"a","Talent Pool":"v",Reject:"r",Join:"g"},KEY="rt_cands_v5";
 const uid=()=>Math.random().toString(36).slice(2,9);
 const D=s=>{const[a,b]=s.split("/");return"2026-"+b.padStart(2,"0")+"-"+a.padStart(2,"0")};
 const nd=s=>{s=(s||"").trim();if(/^\d{4}-\d\d-\d\d$/.test(s))return s;const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);return m?(m[3].length==2?"20"+m[3]:m[3])+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0"):""};
@@ -179,25 +179,10 @@ const fd=s=>s?s.split("-").reverse().join("/"):"-";
 const ini=n=>(n||"?").split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 const P=s=>{const[a,h,k,x]=(s||"").split(",");return{t:a?D(a):"",h:h||"",k:k||"",x:x||""}};
 const blank=()=>{const c={id:""};F.forEach(([k])=>c[k]="");ST.forEach(([k])=>{c[k]={};SCH[k].split("").forEach(f=>c[k][f]="")});return c};
-/* Contoh data dari screenshot spreadsheet: ganti dengan data asli lewat Impor CSV */
-const SEED=[
-"Rizky Andhika Prasetya|Corporate|PDCA Staff|Staff|S1|Teknik Mesin|Institut Teknologi Sepuluh Nopember|E-Career|23/9|23/9,90%,NEXT|30/9,,,14.00",
-"Ian Ale Maryaah|Corporate|HC Digitalization|Staff|S1|Teknik Informatika|Politeknik Elektronika Negeri Surabaya|E-Career|23/9|23/9,90%,NEXT|30/9,,,14.30",
-"Pandji Pratihamma Bagus Bhimanto|Corporate|Sales K4 Manager|Manager|S1|Hubungan Internasional|Institut Ilmu Sosial dan Politik Jakarta|E-Career|23/9|23/9,50%,REJECT",
-"Andy Eko Marhendra|PT. Bagaskoro Mega Langgeng|Supply & Demand Manager|Manager|S1|Teknik Sistem Perkapalan|Institut Teknologi Sepuluh Nopember|E-Career|23/9|23/9,90%,NEXT|30/9,,,15.00",
-"Sayudi|PT. Bagaskoro Mega Langgeng|Fleet User Manager|Manager|S1|Akuntansi|Universitas Bina Sarana Informatika|Jobstreet|23/9|23/9,60%,REJECT",
-"Regina Celine Achmirada|Corporate|AI Engineer|Staff|S1|Computer Science|Bina Nusantara University|Jobstreet|24/9|24/9,80%,NEXT|30/9,,,09.30",
-"Wanda Setria|PT. Bagaskoro Mega Langgeng|Operation Manager|Manager|S1|International Relation|Universitas Muhammadiyah Yogyakarta|Head Hunter|",
-"Abhijeet Beghel|PT. Bagaskoro Mega Langgeng|Branch Manager Bangkok|Manager|S1|Aerospace Engineering|Chulalongkorn University|Referral|",
-"Manuel C Kurniadi|Corporate|Sales Manager Golf & K4 Commercial|Manager|S2|Management|Singapore Management University|Referral|",
-"Achmad Machbub Chuzaeri|Corporate|Red Team / Penetration Tester Staff|Staff|S1|Teknik Industri|Universitas Islam Indonesia|Jobstreet|13/10|16/10,90%,REJECT",
-"Selma Kristina|Corporate|PDCA|Staff|S1|Computer Science|Universitas Komputer Indonesia Bandung|Jobstreet|13/10|15/10,70%,NEXT|23/10,,TALENT POOL,11.00-11.30 Stefanie",
-"Richo Yudha Kurniawan|Corporate|AI Engineer|Staff|S1|Teknik Informatika|Institut Teknologi Sepuluh Nopember|Jobstreet|15/10|15/10,90%,NEXT|26/10,,NEXT,10.30-11.30 Stefanie",
-"Hana Maulita|Corporate|AI Engineer|Staff|S2|Sains Data|University of Sydney|Jobstreet|15/10|15/10,70%,NEXT|23/10,,NEXT,10.00-10.30 Stefanie|24/10,Direkomendasikan",
-"Airlangga Bayu|Corporate|Red Team / Penetration Tester Staff|Staff|S1|Sistem Informasi|Institut Teknologi Sepuluh Nopember|Jobstreet|15/10|15/10,70%,NEXT|23/10,,NEXT,08.30-09.00 Stefanie|29/10,Sangat Disarankan",
-"Ulva Maulidiya|Corporate|PDCA|Staff|S1|Teknik Industri|Universitas Sumatera Utara|E-Career|15/10|15/10,100%,NEXT|23/10,,NEXT,11.30-12.00 Stefanie"];
+
+const SEED=[];
 const mk=l=>{const p=l.split("|"),c=blank();c.id=uid();["nama","per","pos","lvl","edu","jur","uni","src"].forEach((k,i)=>c[k]=p[i]);c.tgl=p[8]?D(p[8]):"";ST.forEach(([k],i)=>c[k]=P(p[9+i]));return fixX(c)};
-function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(v))return v.map(fixX)}catch(e){}try{const v=JSON.parse(localStorage.getItem("rt_cands_v3"));if(Array.isArray(v))return v.map(fixX)}catch(e){}return SEED.map(mk)}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(Array.isArray(v))return v.map(fixX)}catch(e){}return SEED.map(mk)}
 let data=load(),col=-1,tab="",q="",src="",sort="new",view="grid";
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",3500)};
@@ -239,7 +224,7 @@ function vDash(R){
   const S=perf(R,"src"),lb=S.map(x=>x.k);
   return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" dites":""]])
   +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms,[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
-  +`<div class="g3e mt">${pn("Kandidat per tahap saat ini",chart(mkc("bar",COLS,[{label:"Kandidat",data:COLS.map((_,i)=>I.filter(o=>o.i+1===i).length)}],{h:1,sm:1})),"s")}${pn("Funnel: kandidat yang mencapai tiap tahap",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,ST4.map(s=>({label:s,backgroundColor:SC[s],data:S.map(x=>x[KM[s]])})),{h:1,stack:1,sm:1})),"s")}</div>`
+  +`<div class="g2 mt">${pn("Funnel: kandidat yang mencapai tiap tahap",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,ST4.map(s=>({label:s,backgroundColor:SC[s],data:S.map(x=>x[KM[s]])})),{h:1,stack:1,sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari tahap sebelumnya","Dari total","Reject"]),COLS.map((t,i)=>[t,reach[i],i&&reach[i-1]?pct(reach[i],reach[i-1]):"-",pct(reach[i],R.length),rej[i]]),null,"cp"),"s")}</div>`}
 function vKan(R){
   const g=COLS.map(()=>[]);R.forEach(c=>g[info(c).i+1].push(c));
@@ -263,7 +248,7 @@ function vInt(R){
   const lab=t=>{const k=dl(t);return k===0?'<b class="pl a">Hari ini</b>':k===1?'<b class="pl ac">Besok</b>':'<b class="pl mut">H+'+k+'</b>'};
   const nt=`<div class="cs"><span class="pl a">Hari ini: ${cn(0)}</span><span class="pl ac">Besok: ${cn(1)}</span><span class="pl mut">Berikutnya: ${up.length-cn(0)-cn(1)}</span></div>`+(up.length?`<div class="nl">${up.map(c=>`<div class="nt" data-id="${c.id}" tabindex="0"><div class="nd">${lab(c.hc.t)}<small class="mut" style="display:block;margin-top:3px">${wd(c.hc.t)}</small></div><div class="nm"><b>${esc(c.nama)}</b><span class="mut">${esc(c.pos)}</span></div><div class="mut" style="text-align:right;flex:none">${esc(c.hc.w||"-")}<br>${esc(c.hc.p||"-")}</div></div>`).join("")}</div>`:'<p class="mut" style="margin:0">Belum ada interview HC yang dijadwalkan mulai hari ini.</p>');
   const jn=R.filter(c=>c.tgl&&c.join&&c.join.t&&dd(c.tgl,c.join.t)>=0),ds=jn.map(c=>dd(c.tgl,c.join.t)),av=avgOf(ds);
-  const hire=`<div class="hire"><div class="hirec">${av===null?"-":av}</div><div><b>Average Days to Hire</b></div></div><p class="mut" style="margin:10px 0 0">${jn.length?`Dihitung dari ${jn.length} kandidat join · tercepat ${Math.min(...ds)} hari · terlama ${Math.max(...ds)} hari`:"Belum ada kandidat yang join. Angka muncul setelah ada tanggal join."}</p>`+(jn.length?`<div class="mt">${tbl(th(["Nama","Posisi","Melamar","Join","Lama (hari)"]),jn.map(c=>[esc(c.nama),esc(c.pos),fd(c.tgl),fd(c.join.t),dd(c.tgl,c.join.t)]),jn.map(c=>c.id),"cp")}</div>`:"");
+  const hire=`<div class="hire"><div class="hirec">${av===null?"-":av}</div><div><b>Average Days to Hire</b><small class="mut" style="display:block">Rata-rata hari dari tanggal lamaran masuk sampai tanggal join</small></div></div><p class="mut" style="margin:10px 0 0">${jn.length?`Dihitung dari ${jn.length} kandidat join · tercepat ${Math.min(...ds)} hari · terlama ${Math.max(...ds)} hari`:"Belum ada kandidat yang join. Angka muncul setelah ada tanggal join."}</p>`+(jn.length?`<div class="mt">${tbl(th(["Nama","Posisi","Melamar","Join","Lama (hari)"]),jn.map(c=>[esc(c.nama),esc(c.pos),fd(c.tgl),fd(c.join.t),dd(c.tgl,c.join.t)]),jn.map(c=>c.id),"cp")}</div>`:"");
   const sc=R.filter(c=>c.hc&&c.hc.t).sort((a,b)=>b.hc.t.localeCompare(a.hc.t)||String(b.hc.w).localeCompare(String(a.hc.w)));
   return `<div class="g3">${pn("Pengingat interview HC",nt,"s")}${pn("Waktu rekrutmen",hire,"s")}</div>`
   +pn("Jadwal Interview HC"+(sc.length>150?" (150 terbaru)":""),tbl(th(["Tanggal","Waktu","Nama","Posisi","PIC","Hasil",""]),sc.slice(0,150).map(c=>[fd(c.hc.t),esc(c.hc.w||"-"),esc(c.nama),esc(c.pos),esc(c.hc.p||"-"),hasil(c),dl(c.hc.t)===0?'<b class="pl a">Hari ini</b>':dl(c.hc.t)===1?'<b class="pl ac">Besok</b>':dl(c.hc.t)>1?'<b class="pl mut">Mendatang</b>':""]),sc.slice(0,150).map(c=>c.id)),"mt")}
