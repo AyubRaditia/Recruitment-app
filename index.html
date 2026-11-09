@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Talent Pipeline</title>
+<title>Recruitment Tracking &amp; Report</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -129,7 +129,7 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 <body>
 <div class="app">
 <aside class="side" id="side">
-  <div class="brand"><span class="logo">R</span><div><b>Recruitment</b><small>Talent pipeline</small></div></div>
+  <div class="brand"><span class="logo">R</span><div><b>Recruitment</b><small>Tracking &amp; Report</small></div></div>
   <div class="grp">Menu</div><nav id="nav"></nav>
     <div class="foot"><button class="bt" id="imp">Impor Excel / CSV</button><button class="bt" id="exp">Ekspor ke Excel</button><input type="file" id="file" accept=".xlsx,.xls,.csv" hidden><small class="mut">Format kolom sama seperti spreadsheet rekrutmen. Hasil ekspor bisa diimpor kembali.</small></div>
 </aside>
@@ -137,7 +137,7 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 <main>
   <header class="top">
     <button class="bt" id="menu" aria-label="Buka menu">Menu</button>
-    <nav class="crumb"><span>Workspace</span>/<b>Talent pipeline</b></nav>
+    <nav class="crumb"><span>Workspace</span>/<b>Recruitment Tracking &amp; Report</b></nav>
     <div style="display:flex;gap:8px;align-items:center"><span class="chip">Data tersimpan di browser</span><button class="bt" id="theme"></button></div>
   </header>
   <div class="page">
@@ -216,7 +216,7 @@ function mount(){
   document.querySelectorAll("canvas[data-c]").forEach(cv=>{const o=CH[cv.dataset.c],t=o.type,dn=t=="doughnut",fs=o.sm?10:12;
     CI.push(new Chart(cv,{type:t,data:{labels:o.labels,datasets:o.sets.map((s,i)=>({backgroundColor:dn?(s.colors||PAL):PAL[i%10],borderColor:t=="line"?PAL[i%10]:dn?bg:undefined,borderRadius:t=="bar"?5:0,tension:.3,...s}))},
       options:{animation:false,responsive:true,maintainAspectRatio:false,indexAxis:o.h?"y":"x",plugins:{legend:{display:dn||o.sets.length>1,labels:{color:tc,boxWidth:o.sm?8:12,font:{size:fs}}}},
-        scales:dn?{}:{x:{stacked:!!o.stack,ticks:{color:tc,font:{size:fs}},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!o.h,color:gc}}}}}))})}
+        scales:dn?{}:{x:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!o.h,color:gc}}}}}))})}
 function vDash(R){
   const I=R.map(info),n=s=>I.filter(o=>o.st===s).length,tt=R.filter(c=>has(c,"psi")),ps=tt.filter(c=>{const o=info(c);return!(o.st==="Reject"&&o.i===0)});
   const ms=[...new Set(R.map(c=>(c.tgl||"").slice(0,7)).filter(Boolean))].sort(),mc=(m,s)=>R.filter((c,i)=>(c.tgl||"").slice(0,7)===m&&(!s||I[i].st===s)).length;
