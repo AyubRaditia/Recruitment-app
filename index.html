@@ -212,7 +212,8 @@ const gb=(a,f)=>a.reduce((m,x)=>{(m[f(x)]=m[f(x)]||[]).push(x);return m},{});
 const dd=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5),avgOf=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
 const pct=(a,b)=>b?Math.round(a/b*100)+"%":"-",pill=s=>`<b class="pl ${PC[s]}">${s}</b>`;
 const has=(c,k)=>Object.values(c[k]||{}).join("").trim()!=="";
-const rows=()=>data.filter(c=>(!fl.from||c.tgl>=fl.from)&&(!fl.to||c.tgl<=fl.to)&&(!fl.pos||c.pos===fl.pos)&&(!fl.src||c.src===fl.src)&&(!fl.per||c.per===fl.per));
+const eff=c=>{if(c.tgl)return c.tgl;let m="";ST.forEach(([k])=>{const t=(c[k]||{}).t;if(t&&(!m||t<m))m=t});return m},mlab=m=>{const[y,o]=m.split("-");return["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"][o-1]+" "+y};
+const rows=()=>data.filter(c=>(!fl.from||eff(c)>=fl.from)&&(!fl.to||eff(c)&&eff(c)<=fl.to)&&(!fl.pos||c.pos===fl.pos)&&(!fl.src||c.src===fl.src)&&(!fl.per||c.per===fl.per));
 const mkc=(type,labels,sets,o={})=>({type,labels,sets,...o});
 const chart=c=>c.labels.length?(CH.push(c),`<div class="ch${c.sm?" sm":""}${c.h?" h":""}"><canvas data-c="${CH.length-1}"></canvas></div>`):'<p class="mut">Belum ada data untuk grafik ini.</p>';
 const pn=(t,b,cl="")=>`<section class="pn ${cl}"><h3>${t}</h3>${b}</section>`;
@@ -229,11 +230,11 @@ function mount(){
         scales:dn?{}:{x:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!o.h,color:gc}}}}}))})}
 function vDash(R){
   const I=R.map(info),n=s=>I.filter(o=>o.st===s).length,tt=R.filter(c=>has(c,"psi")),ps=tt.filter(c=>{const o=info(c);return!(o.st==="Reject"&&o.i===0)});
-  const ms=[...new Set(R.map(c=>(c.tgl||"").slice(0,7)).filter(Boolean))].sort(),mc=(m,s)=>R.filter((c,i)=>(c.tgl||"").slice(0,7)===m&&(!s||I[i].st===s)).length;
+  const ms=(()=>{const a=[...new Set(R.map(c=>eff(c).slice(0,7)).filter(Boolean))].sort();if(a.length<2)return a;const o=[];let[y,m]=a[0].split("-").map(Number);const e=a[a.length-1];for(;;){const k=y+"-"+String(m).padStart(2,"0");o.push(k);if(k>=e)break;if(++m>12){m=1;y++}}return o})(),mc=(m,s)=>R.filter((c,i)=>eff(c).slice(0,7)===m&&(!s||I[i].st===s)).length;
   const reach=COLS.map((_,i)=>i?R.filter(c=>has(c,ST[i-1][0])).length:R.length),nxt=COLS.map((_,i)=>R.filter(c=>(i?has(c,ST[i-1][0]):true)&&ST.slice(i).some(([k])=>has(c,k))).length),wait=COLS.map((_,i)=>I.filter((o,j)=>o.st==="Proses"&&o.i+1===i&&(i?has(R[j],ST[i-1][0]):true)).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),pos=[...new Set(R.map(c=>c.pos))].sort();
   const S=perf(R,"src"),lb=S.map(x=>x.k);
   return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" dites":""]])
-  +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms,[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
+  +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms.map(mlab),[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Recruitment Stages",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,[{label:"Jumlah pelamar",data:S.map(x=>ST4.reduce((a,k)=>a+(x[KM[k]]||0),0))}],{h:1,sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari total","Lanjut ke tahap berikut","Konversi","Reject","Masih di tahap ini"]),COLS.map((t,i)=>{const L=i<COLS.length-1;return[t,reach[i],pct(reach[i],R.length),L?nxt[i]:"-",L?pct(nxt[i],reach[i]):"-",rej[i],wait[i]]}),null,"cp"),"s")}</div>`}
 function vKan(R){
