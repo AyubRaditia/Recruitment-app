@@ -208,8 +208,8 @@ let pg="dash",fl={from:"",to:"",pos:"",src:"",per:""},dqv="",dg=null,CH=[],CI=[]
 const TD=(()=>{const d=new Date(),p=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})();
 const IC={dash:"M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",lib:"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 3a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.9M16 3.1a4 4 0 010 7.8",kan:"M4 4h4v16H4zm6 0h4v16h-4zm6 0h4v16h-4z",fun:"M22 3H2l8 9.5V19l4 2v-8.5z",src:"M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2c3 3 3 17 0 20M12 2c-3 3-3 17 0 20",clock:"M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2",offer:"M16 7V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v3H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-4zm-6-3h4v3h-4V4z",db:"M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"};
 const ic=n=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${IC[n]}"/></svg>`;
-IC.job=IC.offer;IC.mpp=IC.db;IC.uni=IC.src;
-const VIEWS=[["dash","Dashboard","Ringkasan pelamar, pipeline seleksi, dan sumber lowongan."],["job","Lowongan","Buat lowongan sendiri, lalu tambahkan kandidat yang melamar ke lowongan tersebut."],["lib","Kandidat","Telusuri kandidat sebagai kartu atau tabel. Gunakan filter tahap seleksi untuk menyaring."],["mpp","MPP Meeting","Master data Talent Acquisition: catatan meeting man power planning per perusahaan."],["uni","Universitas","Tracker kerja sama universitas: progres, MoU, dan rencana kegiatan per bulan."],["kan","Kanban","Papan tahapan seleksi. Seret kartu ke kolom berikutnya untuk memajukan kandidat."],["src","Sumber Lowongan","Perbandingan hasil rekrutmen per sumber lowongan dan perusahaan."],["clock","Interview & Waktu","Pengingat jadwal interview HC dan rata-rata lama proses rekrutmen."],["db","Data Lengkap","Seluruh kolom data, sama seperti spreadsheet rekrutmen."]];
+IC.job=IC.offer;IC.uni=IC.src;
+const VIEWS=[["dash","Dashboard","Ringkasan pelamar, pipeline seleksi, dan sumber lowongan."],["job","Lowongan","Buat lowongan sendiri, lalu tambahkan kandidat yang melamar ke lowongan tersebut."],["lib","Kandidat","Telusuri kandidat sebagai kartu atau tabel. Gunakan filter tahap seleksi untuk menyaring."],["uni","Universitas","Tracker kerja sama universitas: progres, MoU, dan rencana kegiatan per bulan."],["kan","Kanban","Papan tahapan seleksi. Seret kartu ke kolom berikutnya untuk memajukan kandidat."],["src","Sumber Lowongan","Perbandingan hasil rekrutmen per sumber lowongan dan perusahaan."],["clock","Interview & Waktu","Pengingat jadwal interview HC dan rata-rata lama proses rekrutmen."],["db","Data Lengkap","Seluruh kolom data, sama seperti spreadsheet rekrutmen."]];
 const XC=[["no","NO",""],...F.map(f=>[f[0],f[1],""]),...ST.flatMap(([k,t])=>SCH[k].split("").map(f=>[k+"."+f,FL[f],t]))];
 const PAL=["#2f5bea","#14b8a6","#f59e0b","#ec4899","#8b5cf6","#0ea5e9","#84cc16","#f97316","#64748b","#e11d48"];
 const ST4=["Proses","Talent Pool","Reject","Join"],SC={Proses:"#f59e0b","Talent Pool":"#8b5cf6",Reject:"#e11d48",Join:"#10b981"},KM={Proses:"p","Talent Pool":"tp",Reject:"r",Join:"j"};
@@ -287,49 +287,39 @@ function vJob(){
   +`<div class="cs"><span class="chip">${esc(j.per||"-")}</span><span class="chip">${esc(j.lvl||"-")}</span>${j.kat?`<span class="chip">${esc(KAT[j.kat]||j.kat)}</span>`:""}${j.qtr?`<span class="chip">PTK ${esc(j.qtr)}</span>`:""}<span class="chip">Dibuka ${fd(j.tgl)}</span>${(j.log||[]).map(l=>`<span class="chip">${esc(l[0])} ${fd(l[1])}</span>`).join("")}<b class="pl ${j.st==="Dibuka"?"g":"mut"}">${esc(j.st)}</b></div>`+(j.cat?`<p class="mut">${esc(j.cat)}</p>`:"")
   +kpi([["Kandidat",s.t,"#2f5bea"],["Dalam proses",s.p,"#f59e0b"],["Talent pool",s.tp,"#8b5cf6"],["Reject",s.r,"#e11d48"],["Join",s.j,"#10b981",j.qty?"dari "+j.qty+" dibutuhkan":""]])
   +(l.length?`<div class="grid mt">${l.map(card).join("")}</div>`:'<div class="empty mt">Belum ada kandidat di lowongan ini. Klik <b>+ Tambah kandidat</b>.</div>')}
-const MK="rt_mpp_v1",UK="rt_uni_v1",MON=["JAN","FEB","MAR","APR","MEI","JUN","JUL","AGT","SEPT","OKT","NOV","DES"],MC={MoU:"#10b981",CR:"#06b6d4",JF:"#d946ef"},STS=["Done","On Progres","Online"];
+const UK="rt_uni_v1",MON=["JAN","FEB","MAR","APR","MEI","JUN","JUL","AGT","SEPT","OKT","NOV","DES"],MC={MoU:"#10b981",CR:"#06b6d4",JF:"#d946ef"},STS=["Done","On Progres","Online"];
 const ld=k=>{try{const v=JSON.parse(localStorage.getItem(k));if(Array.isArray(v))return v}catch(e){}return[]},sv2=(k,a)=>{try{localStorage.setItem(k,JSON.stringify(a))}catch(e){}};
-let mpp=ld(MK),uni=ld(UK),mq="",uq="",ufl="";
+let uni=ld(UK),uq="",ufl="";
 const SVS='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
 const tb=(h,r,a)=>`<div class="tw"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r.length?r.map(([i,c])=>`<tr ${a}="${i}" style="cursor:pointer">${c.map(v=>`<td>${v}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${h.length}" class="mut">Belum ada data. Klik tombol tambah atau impor Excel.</td></tr>`}</tbody></table></div>`;
 const cut=(t,w)=>`<div style="white-space:pre-line;max-width:${w}px;max-height:4.8em;overflow:hidden">${esc(t)}</div>`,sp=v=>v?`<b class="pl ${v==="Done"?"g":v==="Online"?"ac":"a"}">${esc(v)}</b>`:"-",mc=v=>v?`<b class="pl" style="color:${MC[v]}">${v}</b>`:"";
 const bar=(id,ph,v,x)=>`<div class="tool"><div class="sr">${SVS}<input id="${id}" placeholder="${ph}" value="${esc(v)}"></div>${x||""}<button class="bt" data-imp>Impor Excel</button></div>`;
 const ta=(n,l,v,r)=>`<label class="fl" style="grid-column:1/-1">${l}<textarea name="${n}" rows="${r}">${esc(v)}</textarea></label>`;
-function mlist(){const f=mpp.filter(x=>!mq||[x.per,x.sum,x.uni].join(" ").toLowerCase().includes(mq)).sort((a,b)=>(a.tgl||"9").localeCompare(b.tgl||"9"));
-  return`<p class="mut">${f.length} dari ${mpp.length} meeting. Klik baris untuk mengubah.</p>`+tb(["No","Tanggal","Perusahaan","Summary","University"],f.map((x,i)=>[x.id,[i+1,fd(x.tgl),`<b>${esc(x.per)}</b>`,cut(x.sum,560),cut(x.uni,220)]]),"data-mid")}
-function vMpp(){const lu=mpp.reduce((m,x)=>x.tgl>m?x.tgl:m,"");return kpi([["Total meeting",mpp.length,"#2f5bea"],["Perusahaan",new Set(mpp.map(x=>x.per)).size,"#10b981"],["Meeting terakhir",lu?fd(lu):"-","#f59e0b"]])+`<div class="mt">${bar("mq","Cari perusahaan, summary, university…",mq)}</div><div id="ml">${mlist()}</div>`}
 function ulist(){const f=uni.filter(x=>(!ufl||x.kota===ufl)&&(!uq||[x.nama,x.kota,x.pic,x.pi,x.ket].join(" ").toLowerCase().includes(uq)));
   return`<p class="mut">${f.length} dari ${uni.length} universitas. Klik baris untuk mengubah.</p>`+tb(["No","Universitas","Kota","PIC","No HP","PIC Indoprima","Contacted","Discussed","Visited","MOU",...MON,"Keterangan"],f.map((x,i)=>[x.id,[i+1,`<b>${esc(x.nama)}</b>`,esc(x.kota),esc(x.pic),esc(x.hp),esc(x.pi),sp(x.c),sp(x.d),sp(x.v),sp(x.m),...MON.map((_,j)=>mc((x.mo||[])[j])),cut(x.ket,320)]]),"data-uid")}
 function vUni(){const ok=v=>v==="Done"||v==="Online",n=k=>uni.filter(x=>ok(x[k])).length,p=k=>uni.filter(x=>x[k]==="On Progres").length,ko=[...new Set(uni.map(x=>x.kota).filter(Boolean))].sort();
   return kpi([["Total universitas",uni.length,"#2f5bea"],["Contacted",n("c"),"#0ea5e9",p("c")+" on progres"],["Discussed",n("d"),"#8b5cf6",p("d")+" on progres"],["Visited",n("v"),"#f59e0b",p("v")+" on progres"],["MOU",n("m"),"#10b981",p("m")+" on progres"]])
   +`<div class="mt">${bar("uq","Cari universitas, kota, PIC…",uq,`<select id="ufk" aria-label="Kota"><option value="">Semua kota</option>${ko.map(k=>`<option ${k===ufl?"selected":""}>${esc(k)}</option>`).join("")}</select>`)}</div><p class="mut" style="margin:0 0 10px">Rencana bulanan: <b class="pl" style="color:#10b981">MoU</b> <b class="pl" style="color:#06b6d4">CR</b> Campus Recruitment <b class="pl" style="color:#d946ef">JF</b> Job Fair</p><div id="ul">${ulist()}</div>`}
 const mfoot=(id,k)=>`<p class="er" id="er"></p><div class="mf">${id?`<button type="button" class="bt r" data-${k}del="${id}">Hapus</button>`:""}<span></span><button type="button" class="bt" data-x>Batal</button><button class="bt pri">Simpan</button></div>`;
-function openM(id){const o=id?mpp.find(x=>x.id===id):{id:"",tgl:TD,per:"",uni:"",sum:""};if(!o)return;
-  $("#modal").innerHTML=`<div class="md"><form class="sh" id="mf"><div class="mh"><h2>${id?"Ubah meeting":"Tambah meeting"}</h2><button type="button" class="bt" data-x>Tutup</button></div><div class="fg">${fld("tgl","Tanggal",o.tgl,"date")}${fld("per","Perusahaan",o.per)}${fld("uni","University",o.uni)}${ta("sum","Summary",o.sum,10)}</div>${mfoot(id,"m")}</form></div>`;
-  $("#mf").onsubmit=e=>{e.preventDefault();const g=new FormData(e.target),t=k=>(g.get(k)||"").trim(),n={id:o.id||uid(),tgl:t("tgl"),per:t("per"),uni:t("uni"),sum:t("sum")};
-    if(!n.per){$("#er").textContent="Nama perusahaan wajib diisi.";return}
-    mpp=id?mpp.map(x=>x.id===id?n:x):[...mpp,n];sv2(MK,mpp);$("#modal").innerHTML="";render();toast("Meeting tersimpan")}}
 function openU(id){const o=id?uni.find(x=>x.id===id):{id:"",nama:"",kota:"",pic:"",hp:"",pi:"",c:"",d:"",v:"",m:"",ket:"",mo:[]};if(!o)return;
   $("#modal").innerHTML=`<div class="md"><form class="sh" id="uf2"><div class="mh"><h2>${id?"Ubah universitas":"Tambah universitas"}</h2><button type="button" class="bt" data-x>Tutup</button></div><div class="fg">${fld("nama","Universitas",o.nama)}${fld("kota","Kota",o.kota)}${fld("pic","PIC",o.pic)}${fld("hp","No HP",o.hp)}${fld("pi","PIC Indoprima",o.pi)}</div><fieldset><legend>Progres</legend><div class="fg4">${[["c","Contacted"],["d","Discussed"],["v","Visited"],["m","MOU"]].map(([k,l])=>fld(k,l,o[k],STS)).join("")}</div></fieldset><fieldset><legend>Rencana bulanan</legend><div class="fg4">${MON.map((m,i)=>fld("mo"+i,m,(o.mo||[])[i]||"",Object.keys(MC))).join("")}</div></fieldset><div class="fg">${ta("ket","Keterangan",o.ket,6)}</div>${mfoot(id,"u")}</form></div>`;
   $("#uf2").onsubmit=e=>{e.preventDefault();const g=new FormData(e.target),t=k=>(g.get(k)||"").trim(),n={id:o.id||uid()};["nama","kota","pic","hp","pi","c","d","v","m","ket"].forEach(k=>n[k]=t(k));n.mo=MON.map((_,i)=>t("mo"+i));
     if(!n.nama){$("#er").textContent="Nama universitas wajib diisi.";return}
     uni=id?uni.map(x=>x.id===id?n:x):[...uni,n];sv2(UK,uni);$("#modal").innerHTML="";render();toast("Universitas tersimpan")}}
 const hx=(r,re)=>r.findIndex(v=>re.test(N(v))),tx=v=>String(v==null?"":v).trim();
-function impX(wb){let a=0,b=0;const km=new Set(mpp.map(x=>K(x.per)+x.tgl)),ku=new Set(uni.map(x=>K(x.nama)));
+function impX(wb){let b=0;const ku=new Set(uni.map(x=>K(x.nama)));
   wb.SheetNames.forEach(nm=>{const R=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:""}),
-    hr=R.findIndex(r=>hx(r,/^perusahaan$/)>=0&&hx(r,/^summary$/)>=0),ur=R.findIndex(r=>hx(r,/^universitas$/)>=0&&hx(r,/^kota$/)>=0);
-    if(hr>=0){const h=R[hr],t=hx(h,/^tanggal/),p=hx(h,/^perusahaan/),m=hx(h,/^summary/),u=hx(h,/^university/);
-      R.slice(hr+1).forEach(r=>{const o={id:uid(),tgl:t>=0?dv(r[t]):"",per:sv(r[p]),sum:tx(r[m]),uni:u>=0?tx(r[u]):""};if(!o.per||km.has(K(o.per)+o.tgl))return;km.add(K(o.per)+o.tgl);mpp.push(o);a++})}
+    ur=R.findIndex(r=>hx(r,/^universitas$/)>=0&&hx(r,/^kota$/)>=0);
     if(ur>=0){const h=R[ur],mr=R.findIndex(r=>hx(r,/^jan$/)>=0),m0=mr>=0?hx(R[mr],/^jan$/):-1,c=re=>hx(h,re),ix={nama:c(/^universitas$/),kota:c(/^kota$/),pic:c(/^pic$/),hp:c(/hp/),pi:c(/^pic indoprima/),c:c(/^contacted/),d:c(/^discussed/),v:c(/^visited/),m:c(/^mou/),ket:c(/^keterangan/)};
       R.slice(Math.max(ur,mr)+1).forEach(r=>{const g=k=>ix[k]>=0?sv(r[ix[k]]):"",o={id:uid(),nama:g("nama"),kota:g("kota"),pic:g("pic"),hp:ix.hp>=0?cl(hpv(r[ix.hp])):"",pi:g("pi"),c:g("c"),d:g("d"),v:g("v"),m:g("m"),ket:ix.ket>=0?tx(r[ix.ket]):"",
         mo:MON.map((_,i)=>{const v=m0>=0?sv(r[m0+i]).toLowerCase():"";return Object.keys(MC).find(k=>k.toLowerCase()===v)||""})};
         if(!o.nama||ku.has(K(o.nama)))return;ku.add(K(o.nama));uni.push(o);b++})}});
-  sv2(MK,mpp);sv2(UK,uni);return[a,b]}
+  sv2(UK,uni);return b}
 $("#xf").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f||!need("XLSX"))return;
-  try{const[a,b]=impX(XLSX.read(await f.arrayBuffer(),{type:"array"}));render();toast(a||b?"Diimpor: "+a+" meeting, "+b+" universitas":"Tidak ada data baru yang cocok dengan format MPP Meeting / University.")}catch(err){toast("Gagal membaca file: "+(err.message||err))}};
-document.addEventListener("input",e=>{const i=e.target.id;if(i==="mq"){mq=e.target.value.toLowerCase().trim();$("#ml").innerHTML=mlist()}if(i==="uq"){uq=e.target.value.toLowerCase().trim();$("#ul").innerHTML=ulist()}});
+  try{const b=impX(XLSX.read(await f.arrayBuffer(),{type:"array"}));render();toast(b?"Diimpor: "+b+" universitas":"Tidak ada data baru yang cocok dengan format sheet University.")}catch(err){toast("Gagal membaca file: "+(err.message||err))}};
+document.addEventListener("input",e=>{const i=e.target.id;if(i==="uq"){uq=e.target.value.toLowerCase().trim();$("#ul").innerHTML=ulist()}});
 document.addEventListener("change",e=>{if(e.target.id==="ufk"){ufl=e.target.value;$("#ul").innerHTML=ulist()}});
-const VW={dash:vDash,job:vJob,mpp:vMpp,uni:vUni,kan:vKan,src:vSrc,clock:vInt,db:vData};
+const VW={dash:vDash,job:vJob,uni:vUni,kan:vKan,src:vSrc,clock:vInt,db:vData};
 function fbar(){
   const u=k=>[...new Set(data.map(c=>c[k]).filter(Boolean))].sort(),f=(n,l,a)=>{$("#fbar [name="+n+"]").innerHTML=`<option value="">${l}</option>`+a.map(x=>`<option ${x===fl[n]?"selected":""}>${esc(x)}</option>`).join("")};
   f("pos","Semua posisi",u("pos"));f("per","Semua perusahaan",u("per"));f("src","Semua sumber",[...new Set([...SRC,...u("src")])]);
@@ -349,8 +339,8 @@ function render(){
   CH=[];const R=rows(),L=pg==="lib",J=pg==="job",bn=soon().length;if(J&&jobSel&&!jobs.some(x=>x.id===jobSel))jobSel="";
   $("#nav").innerHTML=VIEWS.map(([k,t])=>`<button class="ni ${pg===k?"on":""}" data-pg="${k}">${ic(k)}<span>${esc(t)}</span>${k==="clock"&&bn?`<em class="bdg">${bn}</em>`:""}</button>`).join("");
   
-  fbar();$("#v-lib").hidden=!L;$("#v-oth").hidden=L;const X=J||pg==="mpp"||pg==="uni";$("#fbar").style.display=X?"none":"";$("#v-oth").style.marginTop=X?"24px":"";$("#ftog").style.display=X?"none":"";
-  const V=VIEWS.find(v=>v[0]===pg),jb=J&&jobSel?jobs.find(x=>x.id===jobSel):null;$("#vt").innerHTML=esc(jb?jb.title:V[1])+"<i>.</i>";$("#vd").textContent=jb?"Kandidat untuk lowongan ini. Hanya untuk posisi "+jb.title+".":V[2];$("#add").textContent=pg==="mpp"?"+ Tambah meeting":pg==="uni"?"+ Tambah universitas":J&&!jobSel?"+ Tambah lowongan":"+ Tambah kandidat";
+  fbar();$("#v-lib").hidden=!L;$("#v-oth").hidden=L;const X=J||pg==="uni";$("#fbar").style.display=X?"none":"";$("#v-oth").style.marginTop=X?"24px":"";$("#ftog").style.display=X?"none":"";
+  const V=VIEWS.find(v=>v[0]===pg),jb=J&&jobSel?jobs.find(x=>x.id===jobSel):null;$("#vt").innerHTML=esc(jb?jb.title:V[1])+"<i>.</i>";$("#vd").textContent=jb?"Kandidat untuk lowongan ini. Hanya untuk posisi "+jb.title+".":V[2];$("#add").textContent=pg==="uni"?"+ Tambah universitas":J&&!jobSel?"+ Tambah lowongan":"+ Tambah kandidat";
   if(L)lib(R);else{$("#v-oth").innerHTML=VW[pg](R);mount()}
   document.querySelectorAll("[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
   const dk=(document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark";$("#theme").textContent=dk?"Terang":"Gelap"}
@@ -378,7 +368,7 @@ function openJob(id){
     if(!o.title){$("#er").textContent="Nama posisi wajib diisi.";return}
     if(id){jobs=jobs.map(x=>x.id===id?o:x);data.forEach(c=>{if(c.job===id){c.pos=o.title;c.per=o.per}});save()}else{jobs.unshift(o);jobSel=o.id}
     saveJobs();$("#modal").innerHTML="";render();toast(id?"Lowongan diperbarui":"Lowongan ditambahkan")}}
-document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id],[data-job],[data-mid],[data-uid]");if(!t)return;const d=t.dataset;
+document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id],[data-job],[data-uid]");if(!t)return;const d=t.dataset;
   if(d.pg){pg=d.pg;if(pg==="job")jobSel="";$("#side").classList.remove("open");$("#scrim").classList.remove("on");scrollTo(0,0);render()}
   else if(d.tab!==undefined){tab=d.tab;render()}
   else if(d.v){view=d.v;render()}
@@ -386,9 +376,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id]
   else if(d.del!==undefined){if(d.sure){data=data.filter(x=>x.id!==d.del);save();$("#modal").innerHTML="";render()}else{d.sure=1;t.textContent="Yakin hapus?"}}
   else if(d.x!==undefined){$("#modal").innerHTML=""}
   else if(d.imp!==undefined){$("#xf").click()}
-  else if(d.mid){openM(d.mid)}
   else if(d.uid){openU(d.uid)}
-  else if(d.mdel!==undefined){if(d.sure){mpp=mpp.filter(x=>x.id!==d.mdel);sv2(MK,mpp);$("#modal").innerHTML="";render();toast("Meeting dihapus")}else{d.sure=1;t.textContent="Yakin hapus?"}}
   else if(d.udel!==undefined){if(d.sure){uni=uni.filter(x=>x.id!==d.udel);sv2(UK,uni);$("#modal").innerHTML="";render();toast("Universitas dihapus")}else{d.sure=1;t.textContent="Yakin hapus?"}}
   else if(d.job){jobSel=d.job;scrollTo(0,0);render()}
   else if(d.jback!==undefined){jobSel="";render()}
@@ -400,7 +388,7 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id]
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.id)open(e.target.dataset.id);if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.job){jobSel=e.target.dataset.job;render()}if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();$("#q").focus()}if(e.key==="Escape")$("#modal").innerHTML=""});
 $("#q").oninput=e=>{q=e.target.value.toLowerCase().trim();render()};
 $("#sort").onchange=e=>{sort=e.target.value;render()};$("#stg").onchange=e=>{col=+e.target.value;render()};$("#fbar").onchange=e=>{const n=e.target.name;if(n){fl[n]=e.target.value;render()}};$("#ftog").onclick=()=>$("#fbar").classList.toggle("open");
-$("#add").onclick=()=>pg==="mpp"?openM():pg==="uni"?openU():pg==="job"?(jobSel?addToJob():openJob()):open();
+$("#add").onclick=()=>pg==="uni"?openU():pg==="job"?(jobSel?addToJob():openJob()):open();
 $("#menu").onclick=()=>{$("#side").classList.add("open");$("#scrim").classList.add("on")};
 $("#scrim").onclick=()=>{$("#side").classList.remove("open");$("#scrim").classList.remove("on")};
 $("#theme").onclick=()=>{const dk=(document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark";document.documentElement.dataset.theme=dk?"light":"dark";try{localStorage.setItem("rt_theme",dk?"light":"dark")}catch(e){}render()};
