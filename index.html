@@ -167,14 +167,21 @@ const $=s=>document.querySelector(s),esc=s=>String(s==null?"":s).replace(/[&<>"]
 const SRC=["E-Career","Jobstreet","Head Hunter","Referral","LinkedIn"],KET=["","NEXT","REJECT","TALENT POOL"];
 const ST=[["psi","Psikotes (IAS)"],["hc","Interview HC"],["pc","Plus Consulting"],["ipg","Interview Committee IPG"],["tms","Interview TMS"],["usr","Interview User"],["mcu","MCU"],["off","Offering Letter"],["join","Join"]];
 const COLS=["Lamaran Masuk",...ST.map(s=>s[1])];
-const F=[["nama","Nama Pelamar"],["per","Perusahaan"],["pos","Nama Posisi"],["lvl","Level Jabatan",["Staff","Manager","Director"]],["hp","No. HP"],["edu","Level Pendidikan",["D3","D4","S1","S2","S3"]],["jur","Jurusan"],["uni","Universitas"],["src","Sumber Lowongan",SRC],["tgl","Tanggal Lamaran Masuk","date"]];
+const F=[["nama","Nama Pelamar"],["per","Perusahaan"],["pos","Nama Posisi"],["lvl","Level Jabatan",["Staff","Manager","Director"]],["hp","No. HP"],["edu","Level Pendidikan",["D3","D4","S1","S2","S3"]],["jur","Jurusan"],["uni","Universitas"],["src","Sumber Lowongan",SRC],["tgl","Tanggal Lamaran Masuk","date"],["cat","Catatan"]];
 const FL={t:"Tanggal",h:"Hasil",k:"Keterangan",w:"Waktu",p:"PIC",n:"Nama User",s:"Status"};
 const SCH={psi:"thk",hc:"twpk",pc:"thk",ipg:"th",tms:"th",usr:"nth",mcu:"th",off:"th",join:"ts"};
 const fixX=c=>{ST.forEach(([k])=>{const s=c[k]=c[k]||{};if(s.x!==undefined){if(k=="hc"){const[w,...p]=s.x.split(" ");s.w=w||"";s.p=p.join(" ")}if(k=="usr")s.n=s.x;delete s.x}SCH[k].split("").forEach(f=>{if(s[f]===undefined)s[f]=""})});return c};
 const TABS=["Proses","Talent Pool","Reject","Join"],PC={Proses:"a","Talent Pool":"v",Reject:"r",Join:"g"},KEY="rt_cands_v5";
 const uid=()=>Math.random().toString(36).slice(2,9);
 const D=s=>{const[a,b]=s.split("/");return"2026-"+b.padStart(2,"0")+"-"+a.padStart(2,"0")};
-const nd=s=>{s=(s||"").trim();if(/^\d{4}-\d\d-\d\d$/.test(s))return s;const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);return m?(m[3].length==2?"20"+m[3]:m[3])+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0"):""};
+const MO={jan:1,januari:1,january:1,feb:2,februari:2,february:2,mar:3,maret:3,march:3,apr:4,april:4,mei:5,may:5,jun:6,juni:6,june:6,jul:7,juli:7,july:7,agu:8,agt:8,agus:8,agustus:8,aug:8,august:8,sep:9,sept:9,september:9,okt:10,oct:10,oktober:10,october:10,nov:11,november:11,des:12,dec:12,desember:12,december:12};
+const nd=s=>{s=String(s||"").trim().toLowerCase();if(!s)return"";let m,y,mo,d;const z=n=>String(n).padStart(2,"0");
+  if(m=s.match(/^(\d{4})[\/.-](\d{1,2})[\/.-](\d{1,2})/)){y=+m[1];mo=+m[2];d=+m[3]}
+  else if(m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/)){d=+m[1];mo=+m[2];y=+m[3];if(y<100)y+=2000;if(mo>12&&d<=12)[d,mo]=[mo,d]}
+  else if(m=s.match(/^(\d{1,2})[\s\/.-]*([a-z]+)[\s\/.,-]*(\d{2,4})/)){d=+m[1];mo=MO[m[2]];y=+m[3];if(y<100)y+=2000}
+  else if(m=s.match(/^([a-z]+)\s+(\d{1,2}),?\s+(\d{4})/)){mo=MO[m[1]];d=+m[2];y=+m[3]}
+  else return"";
+  return(!mo||mo>12||!d||d>31)?"":y+"-"+z(mo)+"-"+z(d)};
 const fd=s=>s?s.split("-").reverse().join("/"):"-";
 const ini=n=>(n||"?").split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 const P=s=>{const[a,h,k,x]=(s||"").split(",");return{t:a?D(a):"",h:h||"",k:k||"",x:x||""}};
@@ -186,8 +193,11 @@ function load(){try{const v=JSON.parse(localStorage.getItem(KEY));if(Array.isArr
 let data=load(),col=-1,tab="",q="",src="",sort="new",view="grid";
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",3500)};
-const info=c=>{let cur=-1,rej=-1,tp=0;ST.forEach(([k],i)=>{const s=c[k]||{};const v=Object.values(s).join(" ");if(v.trim())cur=i;if(rej<0&&/reject/i.test(v))rej=i;if(/talent/i.test(v))tp=1});
-  const i=rej>=0?rej:cur;return{i,name:COLS[i+1]||COLS[0],st:rej>=0?"Reject":(c.join||{}).t?"Join":tp?"Talent Pool":"Proses"}};
+const RJ=/reject|tolak|tidak lolos|tdk lolos|gagal|tidak lulus|tidak kerjakan|tidak mau|tidak lanjut|tidak (di)?sarankan|tidak deal|withdraw|not (recommend|pass|fit|suitable|qualified)|unfit|unqualified|\bfail|\bdrop|blacklist|mengundurkan|resign|decline|cancel|batal|no show|tidak hadir|tidak (cocok|sesuai|direkomendasikan)/i,TP=/talent ?pool|candidate pool|cadangan|\bhold\b|simpan|waiting list/i,NX=/^(next|lanjut|lolos|lulus|pass(ed)?|recommended?|direkomendasikan|oke?|go|proceed|fit|accepted?|approved?|diterima|sesuai|cocok)\b/i;
+const sig=s=>["h","k","s"].map(f=>s[f]||"").join(" ");
+const info=c=>{let cur=-1,rej=-1,tp=0;ST.forEach(([k],i)=>{const s=c[k]||{};if(Object.values(s).join("").trim())cur=i;const g=sig(s);if(rej<0&&RJ.test(g))rej=i;if(TP.test(g))tp=1});
+  const pre=cur<0&&rej<0,r0=pre&&RJ.test(c.cat||""),t0=pre&&TP.test(c.cat||"");
+  const i=rej>=0?rej:cur,j=c.join||{};return{i,name:COLS[i+1]||COLS[0],st:rej>=0||r0?"Reject":(j.t||/^(sudah )?join/i.test(j.s||""))?"Join":tp||t0?"Talent Pool":"Proses"}};
 const card=c=>{const o=info(c);return`<article class="cd" data-id="${c.id}" tabindex="0"><div class="pv"><div class="av">${esc(ini(c.nama))}</div><div><div class="stg">${esc(o.name)}</div><div class="seg">${ST.map((_,j)=>`<i class="${j<o.i?"on":j==o.i?(o.st=="Reject"?"rj":o.st=="Join"?"jn":"cur"):""}"></i>`).join("")}</div></div></div><div class="bd"><div class="tg"><span>${esc(c.per||"-")}</span><span>${esc(c.src||"-")}</span></div><h3>${esc(c.nama)}</h3><p>${esc(c.pos)}${c.lvl?" · "+esc(c.lvl):""}</p><p class="mut">${esc([c.edu,c.jur].filter(Boolean).join(" "))}${c.uni?" · "+esc(c.uni):""}</p><div class="ft"><span class="mut">Lamar ${fd(c.tgl)}</span><b class="pl ${PC[o.st]}">${o.st}</b></div></div></article>`};
 const table=l=>`<div class="tw"><table><thead><tr>${["Nama","Posisi","Perusahaan","Sumber","Pendidikan","Universitas","Lamar","Tahap","Status"].map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${l.map(c=>{const o=info(c);return`<tr data-id="${c.id}"><td><b>${esc(c.nama)}</b></td><td>${esc(c.pos)}</td><td>${esc(c.per)}</td><td>${esc(c.src)}</td><td>${esc(c.edu)} ${esc(c.jur)}</td><td>${esc(c.uni)}</td><td>${fd(c.tgl)}</td><td>${esc(o.name)}</td><td><b class="pl ${PC[o.st]}">${o.st}</b></td></tr>`}).join("")}</tbody></table></div>`;
 let pg="dash",fl={from:"",to:"",pos:"",src:"",per:""},dqv="",dg=null,CH=[],CI=[];
@@ -220,12 +230,12 @@ function mount(){
 function vDash(R){
   const I=R.map(info),n=s=>I.filter(o=>o.st===s).length,tt=R.filter(c=>has(c,"psi")),ps=tt.filter(c=>{const o=info(c);return!(o.st==="Reject"&&o.i===0)});
   const ms=[...new Set(R.map(c=>(c.tgl||"").slice(0,7)).filter(Boolean))].sort(),mc=(m,s)=>R.filter((c,i)=>(c.tgl||"").slice(0,7)===m&&(!s||I[i].st===s)).length;
-  const reach=COLS.map((_,i)=>I.filter(o=>o.i+1>=i).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),pos=[...new Set(R.map(c=>c.pos))].sort();
+  const reach=COLS.map((_,i)=>i?R.filter(c=>has(c,ST[i-1][0])).length:R.length),nxt=COLS.map((_,i)=>R.filter(c=>(i?has(c,ST[i-1][0]):true)&&ST.slice(i).some(([k])=>has(c,k))).length),wait=COLS.map((_,i)=>I.filter((o,j)=>o.st==="Proses"&&o.i+1===i&&(i?has(R[j],ST[i-1][0]):true)).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),pos=[...new Set(R.map(c=>c.pos))].sort();
   const S=perf(R,"src"),lb=S.map(x=>x.k);
   return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" dites":""]])
   +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms,[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Recruitment Stages",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,[{label:"Jumlah pelamar",data:S.map(x=>ST4.reduce((a,k)=>a+(x[KM[k]]||0),0))}],{h:1,sm:1})),"s")}</div>`
-  +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari tahap sebelumnya","Dari total","Reject"]),COLS.map((t,i)=>[t,reach[i],i&&reach[i-1]?pct(reach[i],reach[i-1]):"-",pct(reach[i],R.length),rej[i]]),null,"cp"),"s")}</div>`}
+  +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari total","Lanjut ke tahap berikut","Konversi","Reject","Masih di tahap ini"]),COLS.map((t,i)=>{const L=i<COLS.length-1;return[t,reach[i],pct(reach[i],R.length),L?nxt[i]:"-",L?pct(nxt[i],reach[i]):"-",rej[i],wait[i]]}),null,"cp"),"s")}</div>`}
 function vKan(R){
   const g=COLS.map(()=>[]);R.forEach(c=>g[info(c).i+1].push(c));
   return `<div class="kb">${COLS.map((t,i)=>`<div class="kc" data-s="${i}"><div class="kh"><b>${t}</b><span class="mut">${g[i].length}</span></div><div class="kl">${g[i].map(c=>`<div class="kk" draggable="true" data-id="${c.id}"><div class="kr"><b>${esc(c.nama)}</b>${pill(info(c).st)}</div><div class="mut">${esc(c.pos)}</div></div>`).join("")||'<p class="mut" style="text-align:center">Kosong</p>'}</div></div>`).join("")}</div>`}
@@ -313,41 +323,103 @@ $("#scrim").onclick=()=>{$("#side").classList.remove("open");$("#scrim").classLi
 $("#theme").onclick=()=>{const dk=(document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark";document.documentElement.dataset.theme=dk?"light":"dark";try{localStorage.setItem("rt_theme",dk?"light":"dark")}catch(e){}render()};
 try{const t=localStorage.getItem("rt_theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
 const p2=n=>String(n).padStart(2,"0"),N=s=>String(s==null?"":s).toLowerCase().replace(/\s+/g," ").trim();
-const BIO=[["nama",/nama pelamar|^nama$/],["per",/perusahaan/],["pos",/posisi/],["lvl",/level jabatan/],["hp",/\bhp\b|telepon/],["edu",/pendidikan/],["jur",/jurusan/],["uni",/universitas/],["src",/sumber/],["tgl",/lamaran/]];
-const GR=[["psi",/psikotes/],["ipg",/committe|ipg/],["hc",/interview hc/],["pc",/plus|consulting/],["tms",/tms/],["usr",/user/],["mcu",/mcu/],["off",/offering/],["join",/^join/]];
-const SUB=[["n",/nama user/],["t",/tanggal/],["h",/hasil/],["k",/keterangan/],["w",/waktu/],["p",/pic/],["s",/status/]];
-const sv=v=>String(v==null?"":v).trim();
-const dv=v=>{let d;if(v instanceof Date)d=new Date(v.getTime()+432e5);else if(typeof v=="number"&&v>20000)d=new Date(Math.round((v-25569)*864e5)+432e5);else return nd(sv(v));return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
-const tv=v=>{if(v instanceof Date&&v.getFullYear()<1950){const d=new Date(v.getTime()+3e4);return p2(d.getHours())+"."+p2(d.getMinutes())}if(typeof v=="number"&&v<1){const m=Math.round(v*1440);return p2(Math.floor(m/60))+"."+p2(m%60)}return sv(v)};
-const pv=v=>typeof v=="number"?(v<=1?Math.round(v*1000)/10:v)+"%":sv(v);
+const BIO=[["nama",/nama pelamar|nama kandidat|^nama$|^name$|candidate/],["per",/perusahaan|company|entitas|^pt$/],["lvl",/level jabatan|^level$|^jabatan$|grade/],["pos",/posisi|position|^jabatan/],["hp",/\bhp\b|telepon|telp|phone|whatsapp|\bwa\b/],["edu",/pendidikan|education|^edu/],["jur",/jurusan|major/],["uni",/universitas|university|kampus|^univ/],["src",/sumber|source/],["tgl",/lamar|apply|approach|tanggal masuk|tgl masuk/],["cat",/^catatan|^alasan/]];
+const GR=[["psi",/psikotes|psikologi|psychotest|\bias\b/],["hc",/interview hc|hc interview|\bhc\b|hrd/],["pc",/plus|consulting/],["ipg",/committe|\bipg\b/],["tms",/\btms\b/],["usr",/user/],["mcu",/\bmcu\b|medical/],["off",/offering|\bol\b/],["join",/\bjoin/]];
+const SUB=[["n",/nama user|^user$|nama interviewer/],["t",/tanggal|tgl|date/],["h",/hasil|skor|score|nilai|result|rekomendasi/],["k",/keterang|^ket\b|remark|catatan|note/],["w",/waktu|jam|time/],["p",/\bpic\b|interviewer|pewawancara/],["s",/status/]];
+const AL={s:["k","h"],k:["h","s"],h:["k","s"]},OPT={lvl:["Staff","Manager","Director"],edu:["D3","D4","S1","S2","S3"],src:SRC},K=s=>N(s).replace(/[^a-z0-9]/g,"");
+const BL=/^(-+|–|—|\.|n\/?a|null|nil|none|tba|tbd|#n\/a|#value!|#ref!|#div\/0!|0+([.,]0+)?%?)$/i;
+const sv=v=>{if(v instanceof Date)return"";if(typeof v=="number")v=Math.round(v*100)/100;return String(v==null?"":v).replace(/\s+/g," ").trim()};
+const cl=v=>{const x=sv(v);return BL.test(x)?"":x};
+const canon=(k,v)=>{const o=OPT[k];if(!o||!v)return v;return o.find(x=>K(x)===K(v))||v};
+const cn=v=>{if(!v)return"";if(RJ.test(v))return"REJECT";if(TP.test(v))return"TALENT POOL";if(v.length<=20&&NX.test(v))return"NEXT";return v};
+const ser=n=>{const d=new Date(Math.round((n-25569)*864e5));return d.getUTCFullYear()+"-"+p2(d.getUTCMonth()+1)+"-"+p2(d.getUTCDate())};
+const dv=v=>{if(v instanceof Date){const d=new Date(v.getTime()+432e5);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}if(typeof v=="number")return v>=20000&&v<80000?ser(v):"";return nd(cl(v))};
+const tv=v=>{if(typeof v=="number"&&v>0){const m=Math.round((v%1)*1440);if(m>0)return p2(Math.floor(m/60)%24)+"."+p2(m%60)}return cl(v).replace(/(\d{1,2}):(\d{2})(:\d{2})?/g,(a,h,m)=>p2(h)+"."+m)};
+const pv=v=>typeof v=="number"?(v===0?"":(v<=1?Math.round(v*1000)/10:Math.round(v*10)/10)+"%"):cl(v);
+const hpv=v=>typeof v=="number"?(/^62/.test(String(Math.round(v)))?"+":"0")+Math.round(v):sv(v);
+const HINT=[["psi",/psikotes|psikotest|\btes\b|assessment|\bias\b/],["hc",/\bhc\b|interview hc/],["pc",/plus|consult/],["tms",/\btms\b/],["usr",/user/],["ipg",/direksi|committee|\bipg\b/],["mcu",/\bmcu\b|medical/],["off",/offering|salary|gaji|\bdeal\b/]];
+const hint=x=>{const n=N(x),m=HINT.find(h=>h[1].test(n));return m?m[0]:null};
+const mdate=(day,mn,ref,prev)=>{const mo=MO[mn];if(!mo||!(day>=1&&day<=31))return"";const lim=Date.parse(ref+"T00:00:00Z")+14*864e5,mk=y=>Date.UTC(y,mo-1,day);let y=+ref.slice(0,4);if(mk(y)>lim)y--;if(prev&&mk(y)<Date.parse(prev+"T00:00:00Z")&&mk(y+1)<=lim)y++;return y+"-"+p2(mo)+"-"+p2(day)};
+const role=(g,u)=>{
+  if(g=="psi")return/tanggal/.test(u)?"psi.d":/bulan/.test(u)?"psi.m":/result|hasil/.test(u)?"psi.h":null;
+  if(g=="hc")return/tanggal/.test(u)?"hc.a":/waktu|jam/.test(u)?"hc.b":/pic/.test(u)?"hc.c":null;
+  if(g=="usr"){if(/ke tms/.test(u))return"tms.d";if(/hasil plus/.test(u))return"pc.h";if(/plus|consult/.test(u))return"pc.d";if(/direksi/.test(u))return/nama/.test(u)?"dir.1":"dir.2";const n=/user ?2/.test(u)?"u2":"u1";if(/user/.test(u))return n+(/nama/.test(u)?".n":".d");return null}
+  if(g=="mcu")return"mcu.d";if(g=="off")return/result|hasil/.test(u)?"off.h":"off.d";
+  if(g=="join")return/tanggal/.test(u)?"jn.d":/bulan/.test(u)?"jn.m":/status/.test(u)?"jn.s":/keterangan|^ket/.test(u)?"jn.k":null;return null};
+const fixRow=c=>{if(/^\+?\d{8,}$/.test(c.edu)){if(!c.hp)c.hp=/^8/.test(c.edu)?"0"+c.edu:c.edu;c.edu=""}return c};
+const okNama=c=>c.nama&&!/^(nama( pelamar)?|total|jumlah)$/i.test(c.nama.trim());
+function parseLegacy(rows,r){
+  const top=rows[r-1]||[],hd=rows[r],W=Math.max(top.length,hd.length),bio={},ro={},un=[],fs=top.findIndex(v=>GR.some(x=>x[1].test(N(v))));let grp=null;
+  for(let j=0;j<W;j++){const t=N(top[j]),u=N(hd[j]);if(!t&&!u)continue;
+    if(fs>=0&&j>=fs){if(t){const m=GR.find(x=>x[1].test(t));grp=m?m[0]:null}const k=role(grp,u);if(k&&!(k in ro))ro[k]=j;else if(!k)un.push(sv(hd[j])||sv(top[j]))}
+    else{const m=BIO.find(x=>x[1].test(u||t));if(m&&!(m[0] in bio))bio[m[0]]=j;else if(!/^(no|nomor|no\.)$/.test(u||t))un.push(sv(hd[j])||sv(top[j]))}}
+  parseSheet.un=un;if(bio.nama==null)return[];
+  const body=rows.slice(r+1).filter(x=>sv(x[bio.nama]));let ref="";
+  body.forEach(x=>{const d=bio.tgl!=null?dv(x[bio.tgl]):"";if(d&&d>ref&&d<"2100")ref=d});if(!ref)ref=TD;
+  const out=[],g=(row,k)=>k in ro?row[ro[k]]:"";
+  body.forEach(row=>{const c=blank();c.id=uid();
+    Object.entries(bio).forEach(([k,j])=>{const v=row[j];c[k]=k=="tgl"?dv(v):k=="hp"?hpv(v):canon(k,sv(v))});
+    let prev="";const D=(d,m)=>{let x=dv(d);if(!x&&m){const day=typeof d=="number"?d:parseInt(sv(d),10);x=mdate(day,N(m),ref,prev)}if(x)prev=x;return x};
+    c.psi.t=D(g(row,"psi.d"),g(row,"psi.m"));c.psi.h=pv(g(row,"psi.h"));
+    {let dy=0,mo="",d="";[g(row,"hc.a"),g(row,"hc.b"),g(row,"hc.c")].forEach(v=>{if(v===""||v==null)return;
+      if(typeof v=="number"){if(v>0&&v<1){c.hc.w=c.hc.w||tv(v)}else if(v>=20000)d=dv(v);else if(Number.isInteger(v)&&v<=31)dy=v;return}
+      const x=cl(v);if(!x)return;if(MO[N(x)]){mo=N(x);return}if(/^\d{1,2}[.:]\d{2}/.test(x)){c.hc.w=c.hc.w||tv(x);return}
+      const q=nd(x);if(q){d=q;return}if(/^\d{1,2}$/.test(x)){dy=+x;return}c.hc.p=c.hc.p||x});
+      if(!d&&dy&&mo)d=mdate(dy,mo,ref,prev);if(d){prev=d;c.hc.t=d}}
+    c.tms.t=D(g(row,"tms.d"));c.pc.t=D(g(row,"pc.d"));c.pc.h=cn(cl(g(row,"pc.h")));
+    const u1=D(g(row,"u1.d")),u2=D(g(row,"u2.d"));c.usr.t=u1||u2;c.usr.n=[cl(g(row,"u1.n")),cl(g(row,"u2.n"))].filter(Boolean).join(" / ");
+    c.ipg.t=[g(row,"dir.1"),g(row,"dir.2")].map(v=>dv(v)).find(Boolean)||"";
+    c.mcu.t=D(g(row,"mcu.d"));c.off.t=D(g(row,"off.d"));c.off.h=cn(cl(g(row,"off.h")));
+    const stt=cl(g(row,"jn.s")),ket=cl(g(row,"jn.k")),isJ=/^join/i.test(stt);
+    c.join.t=D(g(row,"jn.d"),g(row,"jn.m"));if(isJ)c.join.s=stt;else c.join.t="";c.cat=ket;
+    const all=stt+" "+ket,rj=!isJ&&RJ.test(all),tp=!isJ&&!rj&&TP.test(all);
+    if(rj||tp){let tg=hint(ket)||hint(stt);const li=ST.map(([k])=>has(c,k)).lastIndexOf(true);if(!tg&&li>=0)tg=ST[li][0];
+      if(!RJ.test(ket)&&!TP.test(ket))c.cat=[stt,ket].filter(Boolean).join(" — ");
+      if(tg){const f=SCH[tg].includes("k")?"k":"h",v=rj?"REJECT":"TALENT POOL",o=c[tg][f];c[tg][f]=o&&o!=v?o+" / "+v:v}}
+    fixRow(c);if(okNama(c))out.push(c)});
+  return out}
 function parseSheet(rows){
-  const r=rows.findIndex(x=>x.some(v=>/nama pelamar/.test(N(v))));if(r<0)return[];
-  const has=i=>rows[i]&&rows[i].some(v=>/^(hasil|keterangan|waktu|pic)$/.test(N(v)));
-  let g=r,s=r,st=r+1;if(has(r+1)){s=r+1;st=r+2}else if(has(r)&&r>0)g=r-1;
-  const top=rows[g]||[],sub=rows[s]||[],W=Math.max(top.length,sub.length),fs=top.findIndex(v=>/psikotes/.test(N(v))),map=[];let grp=null;
-  for(let j=0;j<W;j++){
-    if(fs>=0&&j>=fs){const t=N(top[j]);if(t){const m=GR.find(x=>x[1].test(t));grp=m?m[0]:null}const m=SUB.find(x=>x[1].test(N(sub[j])));map[j]=grp&&m?[grp,m[0]]:null}
-    else{const m=BIO.find(x=>x[1].test(N(top[j])||N(sub[j])));map[j]=m?[m[0]]:null}
-  }
+  parseSheet.un=[];parseSheet.lg=false;
+  const subRe=/^(tanggal|tgl|hasil|keterangan|ket|waktu|jam|pic|status|skor|nilai|nama user)\b/,hasSub=i=>rows[i]&&rows[i].filter(v=>subRe.test(N(v))).length>=2,hasGrp=i=>rows[i]&&rows[i].some(v=>GR.some(x=>x[1].test(N(v))));
+  const r=rows.findIndex((x,i)=>x.some(v=>/nama pelamar/.test(N(v))||(/^nama( kandidat)?$/.test(N(v))&&(hasGrp(i)||hasGrp(i-1)||hasGrp(i+1)))));if(r<0)return[];
+  if(rows[r].some(v=>/^bulan$|tanggal ke tms|tanggal int user/.test(N(v)))&&r>0&&hasGrp(r-1)){parseSheet.lg=true;return parseLegacy(rows,r)}
+  let g=r,s=r,st=r+1;if(hasSub(r+1)&&!hasSub(r)){s=r+1;st=r+2}else if(hasSub(r)&&r>0&&hasGrp(r-1))g=r-1;
+  const top=rows[g]||[],sub=rows[s]||[],one=g===s,W=Math.max(top.length,sub.length),fs=top.findIndex(v=>GR.some(x=>x[1].test(N(v)))),cand=[],map=[],un=[],ub={};let grp=null;
+  for(let j=0;j<W;j++){const t=N(top[j]),u=N(sub[j]),lb=sv(top[j])||sv(sub[j]);if(!t&&!u)continue;
+    if(fs>=0&&j>=fs){if(t){const m=GR.find(x=>x[1].test(t));if(m)grp=m[0];else if(!one)grp=null}
+      const m=SUB.find(x=>x[1].test(u||t));if(grp&&m)cand.push([j,grp,m[0],lb]);else un.push(lb)}
+    else{const m=BIO.find(x=>x[1].test(t||u));if(m&&!ub[m[0]]){ub[m[0]]=1;map[j]=[m[0]]}else if(!/^(no|nomor|no\.)$/.test(t||u))un.push(lb)}}
+  const used={};cand.forEach(([j,g,f])=>{if(SCH[g].includes(f)){map[j]=[g,f];used[g+f]=1}});
+  cand.forEach(([j,g,f,lb])=>{if(map[j])return;const a=(AL[f]||[]).find(x=>SCH[g].includes(x)&&!used[g+x]);if(a){map[j]=[g,a];used[g+a]=1}else un.push(lb)});
   const out=[];
   rows.slice(st).forEach(row=>{const c=blank();c.id=uid();
     map.forEach((m,j)=>{if(!m)return;const v=row[j];
-      if(m.length==1)c[m[0]]=m[0]=="tgl"?dv(v):sv(v);
-      else c[m[0]][m[1]]=m[1]=="t"?dv(v):m[1]=="w"?tv(v):m[0]=="psi"&&m[1]=="h"?pv(v):sv(v)});
-    if(c.nama&&N(c.nama)!="nama pelamar")out.push(c)});
-  return out}
+      if(m.length==1){const k=m[0];c[k]=k=="tgl"?dv(v):k=="hp"?hpv(v):canon(k,sv(v))}
+      else{const[g,f]=m;c[g][f]=f=="t"?dv(v):f=="w"?tv(v):g=="psi"&&f=="h"?pv(v):f=="k"||f=="h"?cn(cl(v)):cl(v)}});
+    fixRow(c);if(okNama(c))out.push(c)});
+  parseSheet.un=un;return out}
+function readBook(wb){return wb.SheetNames.map(n=>{const l=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:""}));return l.length?{n,list:l,un:parseSheet.un,lg:parseSheet.lg,on:!/cek|copy|backup|salinan|hijack/i.test(n)}:null}).filter(Boolean)}
+function mergeSel(SH){const m=new Map(),sc=x=>ST.reduce((a,[g])=>a+Object.values(x[g]).filter(Boolean).length,0)+(x.tgl?1:0);
+  SH.forEach(sh=>sh.list.forEach(o=>{const c=JSON.parse(JSON.stringify(o)),k=K(c.nama)+"|"+K(c.pos),w=m.get(k);
+    if(!w){m.set(k,c);return}
+    const [a,b]=sc(c)>sc(w)||(sc(c)==sc(w)&&!sh.lg)?[c,w]:[w,c];
+    Object.keys(b).forEach(f=>{if(typeof b[f]=="object"){Object.keys(b[f]).forEach(q=>{if(!a[f][q]&&b[f][q])a[f][q]=b[f][q]})}else if(!a[f]&&b[f])a[f]=b[f]});m.set(k,a)}));
+  return[...m.values()]}
 const need=n=>window[n]?true:(toast("Library "+n+" gagal dimuat. Periksa koneksi internet."),false);
 async function saveFile(name,blob){
   try{const d=window.claude&&await claude.use("downloads");if(d){await d.save({filename:name,data:blob});return}}catch(e){if(e&&e.code==="declined")return}
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click()}
 $("#imp").onclick=()=>$("#file").click();
 $("#file").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f||!need("XLSX"))return;
-  try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array",cellDates:true});let list=[];
-    for(const n of wb.SheetNames){list=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:""}));if(list.length)break}
-    if(!list.length)return toast("Kolom NAMA PELAMAR tidak ditemukan, atau tidak ada baris data.");
-    $("#modal").innerHTML=`<div class="md"><div class="sh"><div class="mh"><h2>Impor ${list.length} kandidat</h2><button class="bt" data-x>Batal</button></div><p class="mut">File: ${esc(f.name)}. Saat ini ada ${data.length} kandidat. Pilih cara memasukkan data.</p><div class="mf"><span></span><button class="bt" id="i1">Tambahkan ke data</button><button class="bt pri" id="i2">Ganti semua data</button></div></div></div>`;
-    $("#i1").onclick=()=>{const k=c=>[c.nama,c.pos,c.tgl].join("|").toLowerCase(),ex=new Set(data.map(k)),nw=list.filter(c=>!ex.has(k(c)));data=[...data,...nw];done(nw.length+" kandidat ditambahkan"+(list.length>nw.length?", "+(list.length-nw.length)+" dilewati karena sudah ada":""))};
-    $("#i2").onclick=()=>{data=list;done(list.length+" kandidat diimpor")};
+  try{const SH=readBook(XLSX.read(await f.arrayBuffer(),{type:"array"}));
+    if(!SH.length)return toast("Kolom NAMA PELAMAR tidak ditemukan, atau tidak ada baris data.");
+    $("#modal").innerHTML=`<div class="md"><div class="sh"><div class="mh"><h2>Impor dari Excel</h2><button class="bt" data-x>Batal</button></div><p class="mut">File: ${esc(f.name)}. Saat ini ada ${data.length} kandidat. Pilih sheet yang diimpor. Kandidat yang sama antar sheet (nama + posisi) digabung otomatis.</p><div id="shl">${SH.map((x,i)=>`<label style="display:block;margin:6px 0"><input type="checkbox" data-sh="${i}" ${x.on?"checked":""}> <b>${esc(x.n)}</b> · ${x.list.length} kandidat · <span class="mut">${x.lg?"format lama (tanggal + bulan)":"format aplikasi"}</span></label>`).join("")}</div><p class="mut" id="pvw"></p><div class="mf"><span></span><button class="bt" id="i1">Tambahkan ke data</button><button class="bt pri" id="i2">Ganti semua data</button></div></div></div>`;
+    let L=[];const upd=()=>{document.querySelectorAll("#shl input").forEach(x=>SH[+x.dataset.sh].on=x.checked);const S=SH.filter(x=>x.on);L=mergeSel(S);
+      const I=L.map(info),n=t=>I.filter(o=>o.st===t).length,un=[...new Set(S.flatMap(x=>x.un))].filter(Boolean).slice(0,10);
+      $("#pvw").innerHTML=`<b>${L.length} kandidat unik</b> · Proses ${n("Proses")} · Talent Pool ${n("Talent Pool")} · Reject ${n("Reject")} · Join ${n("Join")}<br>Mencapai tahap: ${esc(ST.map(([k,t])=>t.replace(/ \(.*\)/,"")+" "+L.filter(c=>has(c,k)).length).join(" · "))}`+(un.length?`<br>Kolom diabaikan: ${esc(un.join(", "))}`:"");$("#i1").disabled=$("#i2").disabled=!L.length};
+    $("#shl").onchange=upd;upd();
+    $("#i1").onclick=()=>{const k=c=>K(c.nama)+"|"+K(c.pos),ex=new Set(data.map(k)),nw=L.filter(c=>!ex.has(k(c)));data=[...data,...nw];done(nw.length+" kandidat ditambahkan"+(L.length>nw.length?", "+(L.length-nw.length)+" dilewati karena sudah ada":""))};
+    $("#i2").onclick=()=>{data=L;done(L.length+" kandidat diimpor")};
   }catch(err){toast("Gagal membaca file: "+(err.message||err))}};
 function done(m){save();$("#modal").innerHTML="";render();toast(m)}
 const val=(d,k)=>k.includes(".")?((d[k.split(".")[0]]||{})[k.split(".")[1]]||""):(d[k]||"");
