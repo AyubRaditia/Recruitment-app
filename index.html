@@ -124,6 +124,13 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 .bdg{background:var(--er);color:#fff!important;border-radius:99px;padding:0 7px;font-weight:700}
 .hire{display:flex;align-items:center;gap:14px;background:var(--acs);border-radius:99px;padding:8px 20px 8px 8px}
 .hirec{flex:none;width:60px;height:60px;border-radius:50%;background:#f59e0b;color:#1b1300;display:grid;place-items:center;font-size:24px;font-weight:800}
+.g4{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.g4{grid-template-columns:minmax(210px,.9fr) minmax(0,2fr) minmax(0,1fr)}}
+.mini{display:grid;gap:10px;align-content:start}
+.mb{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:10px 14px;min-width:0}
+.mb .mut{font-size:12px;font-weight:600}.mb b{display:block;font-size:24px;letter-spacing:-.02em;line-height:1.2;margin-top:2px}.mb b u{text-decoration:none;font-size:13px;font-weight:600;color:var(--mut);margin-left:3px}
+.mb small{display:block;font-size:11px;line-height:1.35;color:var(--mut);margin-top:2px}
+.pb{height:5px;border-radius:9px;background:var(--ln);margin-top:7px;overflow:hidden}.pb i{display:block;height:100%;background:var(--ok);border-radius:9px}
 </style>
 </head>
 <body>
@@ -233,13 +240,25 @@ function mount(){
     CI.push(new Chart(cv,{type:t,data:{labels:o.labels,datasets:o.sets.map((s,i)=>({backgroundColor:dn?(s.colors||PAL):PAL[i%10],borderColor:t=="line"?PAL[i%10]:dn?bg:undefined,borderRadius:t=="bar"?5:0,tension:.3,...s}))},
       options:{animation:false,responsive:true,maintainAspectRatio:false,indexAxis:o.h?"y":"x",plugins:{legend:{display:dn||o.sets.length>1,labels:{color:tc,boxWidth:o.sm?8:12,font:{size:fs}}}},
         scales:dn?{}:{x:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!!o.h,color:gc}},y:{stacked:!!o.stack,beginAtZero:true,ticks:{color:tc,precision:0,font:{size:fs}},grid:{display:!o.h,color:gc}}}}}))})}
+function mini(R){
+  const ids=new Set(R.map(c=>c.id)),jj=jobs.filter(j=>(!fl.pos||j.title===fl.pos)&&(!fl.per||j.per===fl.per)),jm=new Map(jj.map(j=>[j.id,j]));
+  const need=jj.reduce((a,j)=>a+(+j.qty||0),0),joined=R.filter(c=>jm.has(c.job)&&info(c).st==="Join").length,fr=need?Math.round(joined/need*100):null;
+  const J=R.filter(c=>info(c).st==="Join"&&c.join&&c.join.t),ok=x=>x!==null&&x>=0;
+  const th=J.map(c=>c.tgl?dd(c.tgl,c.join.t):null).filter(ok),tf=J.map(c=>{const j=jm.get(c.job);return j&&j.tgl?dd(j.tgl,c.join.t):null}).filter(ok);
+  const box=(l,c,v,u,sub,bar)=>`<div class="mb"><div class="mut"><span class="dot" style="background:${c}"></span>${l}</div><b>${v}${u?`<u>${u}</u>`:""}</b>${bar!=null?`<div class="pb"><i style="width:${Math.min(bar,100)}%"></i></div>`:""}<small>${sub}</small></div>`;
+  const rg=a=>a.length>1?"Tercepat "+Math.min(...a)+" hr, terlama "+Math.max(...a)+" hr · ":"";
+  return`<div class="mini">`
+  +box("Fulfillment Rate","#10b981",fr==null?"-":fr+"%","",need?joined+" join dari "+need+" kebutuhan karyawan":"Isi “Jumlah Dibutuhkan” di menu Lowongan",fr)
+  +box("Time to Hire","#2f5bea",th.length?avgOf(th):"-",th.length?"hari":"",th.length?rg(th)+"Lamaran masuk → join, rata-rata "+th.length+" kandidat":"Belum ada kandidat join dengan tanggal lengkap")
+  +box("Time to Fill","#f59e0b",tf.length?avgOf(tf):"-",tf.length?"hari":"",tf.length?rg(tf)+"Lowongan dibuka → join, rata-rata "+tf.length+" kandidat":"Belum ada kandidat join dari lowongan yang terdaftar")
+  +`</div>`}
 function vDash(R){
   const I=R.map(info),n=s=>I.filter(o=>o.st===s).length,tt=R.filter(c=>has(c,"psi")),ps=tt.filter(c=>{const o=info(c);return!(o.st==="Reject"&&o.i===0)});
   const ms=(()=>{const a=[...new Set(R.map(c=>eff(c).slice(0,7)).filter(Boolean))].sort();if(a.length<2)return a;const o=[];let[y,m]=a[0].split("-").map(Number);const e=a[a.length-1];for(;;){const k=y+"-"+String(m).padStart(2,"0");o.push(k);if(k>=e)break;if(++m>12){m=1;y++}}return o})(),mc=(m,s)=>R.filter((c,i)=>eff(c).slice(0,7)===m&&(!s||I[i].st===s)).length;
   const reach=COLS.map((_,i)=>i?R.filter(c=>has(c,ST[i-1][0])).length:R.length),nxt=COLS.map((_,i)=>R.filter(c=>(i?has(c,ST[i-1][0]):true)&&ST.slice(i).some(([k])=>has(c,k))).length),wait=COLS.map((_,i)=>I.filter((o,j)=>o.st==="Proses"&&o.i+1===i&&(i?has(R[j],ST[i-1][0]):true)).length),rej=COLS.map((_,i)=>I.filter(o=>o.st==="Reject"&&o.i+1===i).length),pos=[...new Set(R.map(c=>c.pos))].sort();
   const S=perf(R,"src"),lb=S.map(x=>x.k);
   return kpi([["Total pelamar",R.length,"#2f5bea"],["Dalam proses",n("Proses"),"#f59e0b"],["Talent pool",n("Talent Pool"),"#8b5cf6"],["Reject",n("Reject"),"#e11d48"],["Join",n("Join"),"#10b981"],["Lolos psikotes",tt.length?pct(ps.length,tt.length):"-","#0ea5e9",tt.length?ps.length+" dari "+tt.length+" dites":""]])
-  +`<div class="g3 mt">${pn("Tren lamaran per bulan",chart(mkc("line",ms.map(mlab),[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
+  +`<div class="g4 mt">${mini(R)}${pn("Tren lamaran per bulan",chart(mkc("line",ms.map(mlab),[{label:"Lamaran",data:ms.map(m=>mc(m))},{label:"Reject",data:ms.map(m=>mc(m,"Reject"))},{label:"Join",data:ms.map(m=>mc(m,"Join"))}],{sm:1})),"s")}${pn("Distribusi status",chart(mkc("doughnut",ST4,[{data:ST4.map(s=>n(s)),colors:ST4.map(s=>SC[s])}],{sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Recruitment Stages",chart(mkc("bar",COLS,[{label:"Mencapai tahap",data:reach}],{h:1,sm:1})),"s")}${pn("Sumber Lowongan",chart(mkc("bar",lb,[{label:"Jumlah pelamar",data:S.map(x=>ST4.reduce((a,k)=>a+(x[KM[k]]||0),0))}],{h:1,sm:1})),"s")}</div>`
   +`<div class="g2 mt">${pn("Kandidat per tahap saat ini, per posisi",chart(mkc("bar",pos,COLS.map((t,i)=>({label:t,data:pos.map(p=>I.filter((o,j)=>R[j].pos===p&&o.i+1===i).length)})),{h:1,stack:1,sm:1})),"s")}${pn("Rasio konversi antar tahap",tbl(th(["Tahap","Mencapai","Dari total","Lanjut ke tahap berikut","Konversi","Reject","Masih di tahap ini"]),COLS.map((t,i)=>{const L=i<COLS.length-1;return[t,reach[i],pct(reach[i],R.length),L?nxt[i]:"-",L?pct(nxt[i],reach[i]):"-",rej[i],wait[i]]}),null,"cp"),"s")}</div>`}
 function vKan(R){
