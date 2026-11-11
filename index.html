@@ -131,6 +131,9 @@ textarea{width:100%;border:1px solid var(--ln);border-radius:10px;background:var
 .mb .mut{font-size:12px;font-weight:600}.mb b{display:block;font-size:24px;letter-spacing:-.02em;line-height:1.2;margin-top:2px}.mb b u{text-decoration:none;font-size:13px;font-weight:600;color:var(--mut);margin-left:3px}
 .mb small{display:block;font-size:11px;line-height:1.35;color:var(--mut);margin-top:2px}
 .pb{height:5px;border-radius:9px;background:var(--ln);margin-top:7px;overflow:hidden}.pb i{display:block;height:100%;background:var(--ok);border-radius:9px}
+.pk{display:flex;align-items:center;gap:10px;padding:9px 6px;border-top:1px solid var(--ln);cursor:pointer}.pk:first-child{border-top:0}.pk:hover{background:var(--acs)}
+.pk input{width:18px;height:18px;flex:none;accent-color:var(--ac)}.pk span{flex:1;min-width:0}.pk b,.pk small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pk small{font-size:12px}
+#pl{max-height:52vh;overflow-y:auto;margin-top:10px;border:1px solid var(--ln);border-radius:12px;padding:0 8px}
 </style>
 </head>
 <body>
@@ -302,7 +305,7 @@ function vJob(){
     const op=jobs.filter(x=>x.st==="Dibuka").length,qs=k=>jobs.filter(x=>x.kat===k).reduce((a,x)=>a+(+x.qty||0),0),nj=k=>jobs.filter(x=>x.kat===k).length;
     return kpi([["Total lowongan",jobs.length,"#2f5bea","lowongan terdaftar"],["Dibuka",op,"#10b981","sedang aktif"],["Ditutup",jobs.length-op,"#64748b","sudah tidak aktif"],["QTY AMB",qs("AMB"),"#10b981",nj("AMB")+" lowongan",1],["QTY MU",qs("MU"),"#2f5bea",nj("MU")+" lowongan",1]])+`<h2 style="margin:28px 0 14px;font-size:17px">Daftar lowongan</h2><div class="grid">${jobs.map(jcard).join("")}</div>`}
   const s=jst(j),l=s.L.slice().sort((a,b)=>(b.tgl||"").localeCompare(a.tgl||""));
-  return`<div class="cs"><button class="bt" data-jback>← Semua lowongan</button><button class="bt" data-jedit="${j.id}">Ubah lowongan</button><button class="bt" data-jtog="${j.id}">${j.st==="Dibuka"?"Tutup lowongan":"Buka kembali"}</button></div>`
+  return`<div class="cs"><button class="bt" data-jback>← Semua lowongan</button><button class="bt" data-jpull="${j.id}">Ambil kandidat otomatis${pullList(j).length?" ("+pullList(j).length+")":""}</button><button class="bt" data-jedit="${j.id}">Ubah lowongan</button><button class="bt" data-jtog="${j.id}">${j.st==="Dibuka"?"Tutup lowongan":"Buka kembali"}</button></div>`
   +`<div class="cs"><span class="chip">${esc(j.per||"-")}</span><span class="chip">${esc(j.lvl||"-")}</span>${j.kat?`<span class="chip">${esc(KAT[j.kat]||j.kat)}</span>`:""}${j.qtr?`<span class="chip">PTK ${esc(j.qtr)}</span>`:""}<span class="chip">Dibuka ${fd(j.tgl)}</span>${(j.log||[]).map(l=>`<span class="chip">${esc(l[0])} ${fd(l[1])}</span>`).join("")}<b class="pl ${j.st==="Dibuka"?"g":"mut"}">${esc(j.st)}</b></div>`+(j.cat?`<p class="mut">${esc(j.cat)}</p>`:"")
   +kpi([["Kandidat",s.t,"#2f5bea"],["Dalam proses",s.p,"#f59e0b"],["Talent pool",s.tp,"#8b5cf6"],["Reject",s.r,"#e11d48"],["Join",s.j,"#10b981",j.qty?"dari "+j.qty+" dibutuhkan":""]])
   +(l.length?`<div class="grid mt">${l.map(card).join("")}</div>`:'<div class="empty mt">Belum ada kandidat di lowongan ini. Klik <b>+ Tambah kandidat</b>.</div>')}
@@ -355,7 +358,7 @@ function lib(R){
   $("#cnt").textContent="Menampilkan "+l.length+" dari "+data.length+" kandidat";
   $("#out").innerHTML=!l.length?'<div class="empty">Tidak ada kandidat pada filter ini.</div>':view=="grid"?`<div class="grid">${l.map(card).join("")}</div>`:table(l)}
 function render(){
-  CH=[];const R=rows(),L=pg==="lib",J=pg==="job",bn=soon().length;if(J&&jobSel&&!jobs.some(x=>x.id===jobSel))jobSel="";
+  if(autoSync())save();CH=[];const R=rows(),L=pg==="lib",J=pg==="job",bn=soon().length;if(J&&jobSel&&!jobs.some(x=>x.id===jobSel))jobSel="";
   $("#nav").innerHTML=VIEWS.map(([k,t])=>`<button class="ni ${pg===k?"on":""}" data-pg="${k}">${ic(k)}<span>${esc(t)}</span>${k==="clock"&&bn?`<em class="bdg">${bn}</em>`:""}</button>`).join("");
   
   fbar();$("#v-lib").hidden=!L;$("#v-oth").hidden=L;const X=J||pg==="uni";$("#fbar").style.display=X?"none":"";$("#v-oth").style.marginTop=X?"24px":"";$("#ftog").style.display=X?"none":"";
@@ -376,8 +379,16 @@ function open(id,jid){
   $("#fm").onsubmit=e=>{e.preventDefault();const g=new FormData(e.target),o={id:c.id||uid(),job:c.job||""};
     F.forEach(([k])=>o[k]=(g.get(k)||"").trim());if(jb){o.pos=jb.title;o.job=jb.id}if(!o.nama){$("#er").textContent="Nama pelamar wajib diisi.";return}
     ST.forEach(([k])=>{o[k]={};SCH[k].split("").forEach(f=>o[k][f]=(g.get(k+"."+f)||"").trim())});
-    if(id)data=data.map(x=>x.id===id?o:x);else data.unshift(o);save();$("#modal").innerHTML="";render();toast("Kandidat tersimpan")};
+    if(id)data=data.map(x=>x.id===id?o:x);else data.unshift(o);const n=autoSync();save();$("#modal").innerHTML="";render();toast("Kandidat tersimpan"+(n&&o.job&&jobs.some(x=>x.id===o.job)?" dan otomatis masuk ke lowongan "+jobs.find(x=>x.id===o.job).title:""))};
 }
+const tk=x=>N(x).replace(/[^a-z0-9 ]/g," ").split(" ").filter(Boolean).sort().join(" ");
+function posSim(a,b){const x=K(a),y=K(b);if(!x||!y)return 0;if(x===y||tk(a)===tk(b))return 2;const m=Math.min(x.length,y.length);return m>=4&&(x.includes(y)||y.includes(x))?1:0}
+function autoSync(){let n=0;data.forEach(c=>{if(c.job||!c.pos)return;let best=null,bs=0;jobs.forEach(j=>{if(j.per&&c.per&&K(j.per)!==K(c.per))return;const v=posSim(c.pos,j.title);if(!v)return;const sc=v*2+(j.st==="Dibuka"?1:0);if(sc>bs){bs=sc;best=j}});if(!best)return;c.job=best.id;c.pos=best.title;if(!c.per&&best.per)c.per=best.per;n++});return n}
+function pullList(j){return data.filter(c=>!c.job&&c.pos&&posSim(c.pos,j.title))}
+function openPull(jid,quiet){const j=jobs.find(x=>x.id===jid);if(!j)return;const L=pullList(j);
+  if(!L.length){if(!quiet)toast("Tidak ada kandidat tanpa lowongan dengan posisi mirip \""+j.title+"\".");return}
+  const same=c=>!j.per||!c.per||K(c.per)===K(j.per);
+  $("#modal").innerHTML=`<div class="md"><div class="sh"><div class="mh"><h2>Kandidat untuk ${esc(j.title)}</h2><button type="button" class="bt" data-x>Tutup</button></div><p class="mut" style="margin:6px 0 0">Ditemukan ${L.length} kandidat dengan posisi mirip yang belum masuk lowongan mana pun. Centang yang mau dimasukkan.${L.some(c=>!same(c))?" Yang beda perusahaan dengan lowongan tidak dicentang otomatis.":""}</p><div id="pl">${L.map(c=>`<label class="pk"><input type="checkbox" value="${c.id}" ${same(c)?"checked":""}><span><b>${esc(c.nama)}</b><small class="mut">${esc(c.pos)} · ${esc(c.per||"-")} · Lamar ${fd(c.tgl)}</small></span>${pill(info(c).st)}</label>`).join("")}</div><div class="mf"><button type="button" class="bt" data-pall>Pilih / lepas semua</button><span></span><button type="button" class="bt" data-x>Nanti saja</button><button type="button" class="bt pri" data-pullgo="${j.id}">Masukkan ke lowongan</button></div></div></div>`}
 function addToJob(){const j=jobs.find(x=>x.id===jobSel);if(!j)return;if(j.st!=="Dibuka")return toast("Lowongan ini ditutup. Buka kembali dulu untuk menambah kandidat.");open("",j.id)}
 function openJob(id){
   const j=id?jobs.find(x=>x.id===id):{id:"",title:"",per:"",lvl:"",kat:"",qtr:"",qty:"",tgl:TD,st:"Dibuka",cat:"",log:[]};if(!j)return;
@@ -386,7 +397,7 @@ function openJob(id){
   $("#jf").onsubmit=e=>{e.preventDefault();const g=new FormData(e.target),t=k=>(g.get(k)||"").trim(),o={id:j.id||uid(),title:t("title"),per:t("per"),lvl:t("lvl"),kat:t("kat"),qtr:t("qtr"),qty:parseInt(t("qty"),10)||"",tgl:t("tgl")||TD,st:t("st")||"Dibuka",cat:t("cat"),log:(j.log||[]).slice()};if(id?o.st!==j.st:o.st==="Ditutup")o.log.push([o.st==="Ditutup"?"Ditutup":"Dibuka kembali",TD]);
     if(!o.title){$("#er").textContent="Nama posisi wajib diisi.";return}
     if(id){jobs=jobs.map(x=>x.id===id?o:x);data.forEach(c=>{if(c.job===id){c.pos=o.title;c.per=o.per}});save()}else{jobs.unshift(o);jobSel=o.id}
-    saveJobs();$("#modal").innerHTML="";render();toast(id?"Lowongan diperbarui":"Lowongan ditambahkan")}}
+    saveJobs();$("#modal").innerHTML="";const n=autoSync();if(n)save();render();toast((id?"Lowongan diperbarui":"Lowongan ditambahkan")+(n?". "+n+" kandidat otomatis masuk ke lowongan ini":""))}}
 document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id],[data-job],[data-uid]");if(!t)return;const d=t.dataset;
   if(d.pg){pg=d.pg;if(pg==="job")jobSel="";$("#side").classList.remove("open");$("#scrim").classList.remove("on");scrollTo(0,0);render()}
   else if(d.tab!==undefined){tab=d.tab;render()}
@@ -400,6 +411,9 @@ document.addEventListener("click",e=>{const t=e.target.closest("button,[data-id]
   else if(d.job){jobSel=d.job;scrollTo(0,0);render()}
   else if(d.jback!==undefined){jobSel="";render()}
   else if(d.jedit){openJob(d.jedit)}
+  else if(d.jpull){openPull(d.jpull)}
+  else if(d.pall!==undefined){const b=[...document.querySelectorAll("#pl input")],a=b.some(x=>!x.checked);b.forEach(x=>x.checked=a)}
+  else if(d.pullgo){const j=jobs.find(x=>x.id===d.pullgo),ids=new Set([...document.querySelectorAll("#pl input:checked")].map(x=>x.value));if(!j||!ids.size){toast("Belum ada kandidat yang dicentang.");return}data.forEach(c=>{if(ids.has(c.id)&&!c.job){c.job=j.id;c.pos=j.title;if(!c.per&&j.per)c.per=j.per}});save();$("#modal").innerHTML="";jobSel=j.id;render();toast(ids.size+" kandidat dimasukkan ke "+j.title)}
   else if(d.jtog){const j=jobs.find(x=>x.id===d.jtog);if(j){j.st=j.st==="Dibuka"?"Ditutup":"Dibuka";(j.log=j.log||[]).push([j.st==="Ditutup"?"Ditutup":"Dibuka kembali",TD]);saveJobs();render();toast("Lowongan "+j.title+" "+j.st.toLowerCase())}}
   else if(d.jdel!==undefined){if(d.sure){jobs=jobs.filter(x=>x.id!==d.jdel);data.forEach(c=>{if(c.job===d.jdel)c.job=""});jobSel="";save();saveJobs();$("#modal").innerHTML="";render();toast("Lowongan dihapus. Kandidatnya tetap ada di menu Kandidat.")}else{d.sure=1;t.textContent="Yakin hapus?"}}
   else if(d.id){open(d.id)}
@@ -511,7 +525,7 @@ $("#file").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f|
     $("#i1").onclick=()=>{const k=c=>K(c.nama)+"|"+K(c.pos),ex=new Set(data.map(k)),nw=L.filter(c=>!ex.has(k(c)));data=[...data,...nw];done(nw.length+" kandidat ditambahkan"+(L.length>nw.length?", "+(L.length-nw.length)+" dilewati karena sudah ada":""))};
     $("#i2").onclick=()=>{data=L;done(L.length+" kandidat diimpor")};
   }catch(err){toast("Gagal membaca file: "+(err.message||err))}};
-function done(m){save();$("#modal").innerHTML="";render();toast(m)}
+function done(m){autoSync();save();$("#modal").innerHTML="";render();toast(m)}
 const val=(d,k)=>k.includes(".")?((d[k.split(".")[0]]||{})[k.split(".")[1]]||""):(d[k]||"");
 $("#exp").onclick=async()=>{
   if(!need("ExcelJS"))return;if(!data.length)return toast("Belum ada data untuk diekspor.");
@@ -538,6 +552,7 @@ $("#exp").onclick=async()=>{
   const s2=wb.addWorksheet("Ringkasan");s2.addRow(["Ringkasan rekrutmen","Jumlah"]).font={bold:true};s2.addRow(["Total kandidat",data.length]);
   TABS.forEach(t=>s2.addRow(["Status: "+t,data.filter(c=>info(c).st===t).length]));COLS.forEach((t,i)=>s2.addRow(["Tahap saat ini: "+t,data.filter(c=>info(c).i+1===i).length]));s2.getColumn(1).width=36;
   try{const buf=await wb.xlsx.writeBuffer();await saveFile("kandidat-rekrutmen-"+new Date().toISOString().slice(0,10)+".xlsx",new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))}catch(err){toast("Gagal membuat file Excel")}};
+{if(autoSync())save()}
 render();
 {const t=data.filter(c=>c.hc&&c.hc.t===TD).length,b=data.filter(c=>c.hc&&c.hc.t&&dd(TD,c.hc.t)===1).length;if(t||b)toast("Interview HC · hari ini: "+t+", besok: "+b+". Lihat menu Interview & Waktu.")}
 </script>
